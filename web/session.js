@@ -28,6 +28,7 @@ export function randomSeed() {
  * @param {number} request.seed        seed for RND
  * @param {number} [request.maxSteps]
  * @param {number} [request.outputLimit]
+ * @param {string} [request.dialect]   "microsoft" (default) or "dartmouth"
  * @returns {{
  *   status: "done" | "waiting" | "error" | "step-limit" | "output-limit" | "crash",
  *   segments: { type: "out" | "in", text: string }[],
@@ -43,9 +44,10 @@ export function runProgram(module, request) {
     seed,
     maxSteps = DEFAULT_MAX_STEPS,
     outputLimit = DEFAULT_OUTPUT_LIMIT,
+    dialect = "microsoft",
   } = request;
   const run = runWasi(module, {
-    args: ["chuk-basic", "--seed", String(seed), "--max-steps", String(maxSteps), PROGRAM_PATH],
+    args: ["chuk-basic", "--seed", String(seed), "--max-steps", String(maxSteps), "--dialect", dialect, PROGRAM_PATH],
     files: { [PROGRAM_PATH]: source },
     stdin: inputs,
     outputLimit,
@@ -91,12 +93,13 @@ export function transcriptText(result) {
  * promise of it (the page runs it in a worker).
  */
 export class Session {
-  constructor(runner, { source, seed = randomSeed(), maxSteps, outputLimit }) {
+  constructor(runner, { source, seed = randomSeed(), maxSteps, outputLimit, dialect }) {
     this.runner = runner;
     this.source = source;
     this.seed = seed;
     this.maxSteps = maxSteps;
     this.outputLimit = outputLimit;
+    this.dialect = dialect;
     /** Lines typed so far. */
     this.inputs = [];
     /** The result of the latest run. */
@@ -139,6 +142,7 @@ export class Session {
         seed: this.seed,
         maxSteps: this.maxSteps,
         outputLimit: this.outputLimit,
+        dialect: this.dialect,
       });
     } finally {
       this.busy = false;

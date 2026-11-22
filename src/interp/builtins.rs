@@ -11,6 +11,6 @@ impl Interpreter<'_> {
             .iter()
             .map(|arg| self.eval(arg))
             .collect::<Result<Vec<Value>>>()?;
-        builtins::call(builtin, &values, &mut self.rnd).at(self.line)
+        builtins::call(builtin, &values, &mut self.rnd, self.dialect).at(self.line)
     }
 }

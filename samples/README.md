@@ -1,11 +1,12 @@
 # Sample programs
 
-145 BASIC programs to run, read and test with.
+150 BASIC programs to run, read and test with.
 
 | Folder | What is in it |
 | --- | --- |
 | `samples/` | The seven programs the project started with |
 | [`samples/tutorial/`](tutorial) | The 14 programs of the [tutorial](../docs/TUTORIAL.md), in order |
+| [`samples/dartmouth/`](dartmouth) | The programs printed in the first BASIC manual, May 1964 ([scans](../docs/scans/README.md)) |
 | [`samples/classic/`](classic) | 21 short programs that each show off one idea |
 | [`samples/games/`](games) | The 103 programs of *BASIC Computer Games* |
 

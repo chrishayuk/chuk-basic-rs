@@ -106,6 +106,10 @@ function createRunner(module) {
 let runner = null;
 let session = null;
 let loadedExample = "";
+/** The arithmetic each example was written for (file -> dialect). */
+const dialects = new Map();
+/** The arithmetic to run the program in the editor with. */
+let dialect = "microsoft";
 let runningTimer = 0;
 
 function setStatus(text, kind = "") {
@@ -225,6 +229,7 @@ function run() {
   session = new Session(runner.run, {
     source: editor.value,
     seed: seedText === "" ? randomSeed() : seedText,
+    dialect,
   });
   renderTranscript([]);
   const s = session;
@@ -273,6 +278,8 @@ async function loadExample(file) {
     editor.value = text;
     editor.scrollTop = 0;
     loadedExample = text;
+    // the 1964 manual's programs expect Dartmouth's arithmetic
+    dialect = dialects.get(file) || "microsoft";
     renderTranscript([]);
     if (runner !== null) setStatus("Ready - press Run");
   } catch (error) {
@@ -287,6 +294,7 @@ async function loadExamples() {
       ...list.map((example) => {
         const option = document.createElement("option");
         option.value = example.file;
+        dialects.set(example.file, example.dialect);
         option.textContent = example.title;
         return option;
       }),

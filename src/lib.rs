@@ -25,6 +25,7 @@ pub use error::{Error, ErrorKind, Result};
 pub use interp::Interpreter;
 pub use lexer::{tokenize, tokenize_line, Spacing};
 pub use parser::parse;
+pub use rt::Dialect;
 
 /// Parse and run a program, reading INPUT from `input` and printing to
 /// `output`. `seed` fixes the RND sequence; `None` seeds from the clock.

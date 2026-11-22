@@ -1,5 +1,6 @@
 //! The built-in functions, as plain functions of their argument values.
 
+use super::dialect::Dialect;
 use super::format::{signed, val};
 use super::rng::Rnd;
 use super::value::Value;
@@ -47,7 +48,7 @@ impl Args<'_> {
 }
 
 /// Call `builtin`. The parser has already checked the number of arguments.
-pub fn call(builtin: Builtin, values: &[Value], rnd: &mut Rnd) -> Result<Value> {
+pub fn call(builtin: Builtin, values: &[Value], rnd: &mut Rnd, dialect: Dialect) -> Result<Value> {
     use Builtin::*;
     let args = Args { builtin, values };
     Ok(match builtin {
@@ -62,8 +63,10 @@ pub fn call(builtin: Builtin, values: &[Value], rnd: &mut Rnd) -> Result<Value> 
                 Abs => x.abs(),
                 Log if x <= 0.0 => return args.illegal(),
                 Log => x.ln(),
-                Sqr if x < 0.0 => return args.illegal(),
-                Sqr => x.sqrt(),
+                Sqr => match dialect.sqrt(x) {
+                    Some(root) => root,
+                    None => return args.illegal(),
+                },
                 Int => x.floor(),
                 Fix => x.trunc(),
                 _ if x > 0.0 => 1.0,
@@ -150,7 +153,7 @@ mod tests {
     use super::*;
 
     fn call1(builtin: Builtin, values: &[Value]) -> Result<Value> {
-        call(builtin, values, &mut Rnd::new(Some(1)))
+        call(builtin, values, &mut Rnd::new(Some(1)), Dialect::default())
     }
 
     fn s(text: &str) -> Value {

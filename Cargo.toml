@@ -13,6 +13,12 @@ path = "src/lib.rs"
 name = "chuk-basic"
 path = "src/main.rs"
 
+[features]
+default = ["compiler"]
+# `--compile`, which embeds the runtime library (250 KB). The browser
+# playground is built without it.
+compiler = []
+
 [workspace]
 members = ["runtime"]
 

@@ -169,15 +169,25 @@ await test("endless printing is stopped by the output limit", () => {
   assert.ok(transcriptText(result).startsWith("SPAM\nSPAM\n"));
 });
 
+await test("the 1964 manual's quadratic example needs Dartmouth arithmetic", () => {
+  const source = read(join(web, "examples", "example2.bas"));
+  const later = runProgram(module, { source, seed: 1 });
+  assert.equal(later.message, "Runtime error in line 40: Illegal function call: SQR");
+  const dartmouth = runProgram(module, { source, seed: 1, dialect: "dartmouth" });
+  assert.ok(transcriptText(dartmouth).includes("IMAGINARY PART= 1.41421356"));
+});
+
 // the bundled examples
 await test("every example in web/examples loads and starts", () => {
   const examples = JSON.parse(read(join(web, "examples", "index.json")));
   assert.ok(examples.length >= 8);
   for (const example of examples) {
     const source = read(join(web, "examples", example.file));
-    const result = runProgram(module, { source, seed: 42 });
+    const result = runProgram(module, { source, seed: 42, dialect: example.dialect });
+    // the 1964 quadratic example reads DATA until there is none left
+    const ranOut = result.status === "error" && result.message.includes("Out of DATA");
     assert.ok(
-      result.status === "done" || result.status === "waiting",
+      result.status === "done" || result.status === "waiting" || ranOut,
       `${example.file}: ${result.status} ${result.message}`,
     );
     assert.equal(result.status === "waiting", example.input, `${example.file}: "input" in the manifest`);

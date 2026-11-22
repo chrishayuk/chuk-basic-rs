@@ -40,6 +40,10 @@ fn compile(source: &str) -> Vec<u8> {
 
 /// Run a compiled module; returns what it printed and its error message.
 fn run_compiled(module: &[u8], input: &str, seed: u64) -> (String, String) {
+    run_compiled_with(module, input, seed, &[])
+}
+
+fn run_compiled_with(module: &[u8], input: &str, seed: u64, options: &[&str]) -> (String, String) {
     static NEXT: AtomicUsize = AtomicUsize::new(0);
     let file: PathBuf = std::env::temp_dir().join(format!(
         "chuk-basic-test-{}-{}.wasm",
@@ -57,6 +61,7 @@ fn run_compiled(module: &[u8], input: &str, seed: u64) -> (String, String) {
             "--max-steps",
             &STEP_LIMIT.to_string(),
         ])
+        .args(options)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
@@ -243,6 +248,40 @@ fn errors_are_the_same() {
         .filter_map(|source| difference(source, source, "", SEED))
         .collect();
     assert!(differences.is_empty(), "{}", differences.join("\n\n"));
+}
+
+/// The 1964 manual's programs, compiled, in both arithmetics.
+#[test]
+fn dartmouth_examples_and_dialect() {
+    if !wasmtime_available() {
+        return;
+    }
+    for path in programs("samples/dartmouth") {
+        let source = read(&path);
+        for dialect in ["microsoft", "dartmouth"] {
+            let interpreted = {
+                let mut output = Vec::new();
+                let result = chuk_basic::parse(&source).and_then(|program| {
+                    let mut input = std::io::empty();
+                    let mut interpreter =
+                        chuk_basic::Interpreter::new(program, &mut input, &mut output, Some(SEED))?;
+                    interpreter.set_dialect(chuk_basic::Dialect::from_name(dialect).unwrap());
+                    interpreter.run()
+                });
+                (
+                    String::from_utf8(output).unwrap(),
+                    result.err().map(|e| e.to_string()).unwrap_or_default(),
+                )
+            };
+            let compiled = run_compiled_with(&compile(&source), "", SEED, &["--dialect", dialect]);
+            assert_eq!(
+                interpreted,
+                compiled,
+                "{} with {dialect} arithmetic",
+                path.display()
+            );
+        }
+    }
 }
 
 /// A few things about the module itself.

@@ -177,7 +177,7 @@ pub extern "C" fn rt_div(a: f64, b: f64) -> f64 {
 
 #[no_mangle]
 pub extern "C" fn rt_pow(a: f64, b: f64) -> f64 {
-    a.powf(b)
+    with(|rt| rt.dialect.power(a, b))
 }
 
 #[no_mangle]
@@ -269,7 +269,7 @@ fn call_builtin(rt: &mut Runtime, builtin: i32, count: i32) -> Value {
     let builtin =
         Builtin::from_name(Builtin::NAMES[builtin as usize]).expect("a built-in function");
     let args = rt.take_args(count);
-    let result = builtins::call(builtin, &args, &mut rt.rnd);
+    let result = builtins::call(builtin, &args, &mut rt.rnd, rt.dialect);
     rt.check(result)
 }
 

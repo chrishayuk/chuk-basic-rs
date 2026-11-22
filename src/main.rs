@@ -4,11 +4,14 @@ use std::io::{self, LineWriter, Write};
 use std::path::Path;
 use std::process::ExitCode;
 
-use chuk_basic::{repl, ErrorKind};
+use chuk_basic::{repl, Dialect, ErrorKind};
 
 /// The runtime that compiled programs are linked against: the `runtime`
 /// crate built for WASI (see `scripts/build-runtime.sh`).
+#[cfg(feature = "compiler")]
 const RUNTIME: &[u8] = include_bytes!("../runtime/chuk_basic_rt.wasm");
+#[cfg(not(feature = "compiler"))]
+const RUNTIME: &[u8] = &[];
 
 const USAGE: &str = "\
 Usage: chuk-basic [OPTIONS] [FILE.bas]
@@ -23,6 +26,7 @@ Options:
       --seed <N>       Seed the random number generator (repeatable runs)
       --max-steps <N>  Stop with an error after N operations
       --echo           Echo INPUT lines to the output (for piped input)
+      --dialect <NAME> Arithmetic to follow: microsoft (default) or dartmouth
   -h, --help           Show this help
   -V, --version        Show the version";
 
@@ -38,6 +42,7 @@ struct Args {
     seed: Option<u64>,
     max_steps: Option<u64>,
     echo: bool,
+    dialect: Dialect,
     /// Where `--compile` writes; by default, beside the program.
     output: Option<String>,
     /// The program to run; `None` starts the interactive prompt.
@@ -49,6 +54,7 @@ fn parse_args() -> Result<Option<Args>, String> {
     let mut seed = None;
     let mut max_steps = None;
     let mut echo = false;
+    let mut dialect = Dialect::default();
     let mut output = None;
     let mut path = None;
     let mut args = std::env::args().skip(1);
@@ -65,6 +71,11 @@ fn parse_args() -> Result<Option<Args>, String> {
             "--tokens" => mode = Mode::Tokens,
             "--ast" => mode = Mode::Ast,
             "--echo" => echo = true,
+            "--dialect" => {
+                let name = args.next().ok_or("--dialect needs a name")?;
+                dialect = Dialect::from_name(&name)
+                    .ok_or(format!("Unknown dialect: {name} (microsoft or dartmouth)"))?;
+            }
             "--compile" => mode = Mode::Compile,
             "-o" | "--output" => output = Some(args.next().ok_or("--output needs a file name")?),
             "--seed" => {
@@ -93,6 +104,7 @@ fn parse_args() -> Result<Option<Args>, String> {
         seed,
         max_steps,
         echo,
+        dialect,
         output,
         path,
     }))
@@ -106,6 +118,7 @@ fn run(args: &Args) -> Result<(), String> {
                 seed: args.seed,
                 step_limit: args.max_steps,
                 echo: args.echo,
+                dialect: args.dialect,
             };
             repl::repl(&mut io::stdin().lock(), &mut output, &options)
         }
@@ -121,6 +134,9 @@ fn run(args: &Args) -> Result<(), String> {
                 Mode::Ast => chuk_basic::parse(&source).map(|program| {
                     let _ = writeln!(output, "{}", program.to_json());
                 }),
+                Mode::Compile if RUNTIME.is_empty() => {
+                    return Err("This build of chuk-basic does not include the compiler".to_string())
+                }
                 Mode::Compile => chuk_basic::wasm::compile(&source, RUNTIME).and_then(|module| {
                     let to = args.output.clone().unwrap_or_else(|| {
                         Path::new(path).with_extension("wasm").display().to_string()
@@ -133,6 +149,7 @@ fn run(args: &Args) -> Result<(), String> {
                         chuk_basic::Interpreter::new(program, &mut input, &mut output, args.seed)?;
                     interpreter.set_step_limit(args.max_steps);
                     interpreter.set_echo_input(args.echo);
+                    interpreter.set_dialect(args.dialect);
                     interpreter.run()
                 }),
             }

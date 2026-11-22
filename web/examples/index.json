@@ -1,10 +1,91 @@
 [
-  { "file": "hello.bas", "title": "Hello, world", "input": false },
-  { "file": "primes.bas", "title": "Primes", "input": false },
-  { "file": "mandelbrot.bas", "title": "Mandelbrot set", "input": false },
-  { "file": "guess.bas", "title": "Guess the number", "input": true },
-  { "file": "hi-lo.bas", "title": "Hi-Lo (game)", "input": true },
-  { "file": "hammurabi.bas", "title": "Hammurabi (game)", "input": true },
-  { "file": "lunar.bas", "title": "Lunar Lander (game)", "input": true },
-  { "file": "superstartrek.bas", "title": "Super Star Trek (game)", "input": true }
+  {
+    "file": "preface.bas",
+    "title": "1964: the preface's program",
+    "input": false,
+    "from": "samples/dartmouth",
+    "scan": "p01-preface.jpg",
+    "detail": "detail-preface-program.jpg",
+    "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 1",
+    "prints": "5"
+  },
+  {
+    "file": "example1.bas",
+    "title": "1964: example 1, average of 100 logs",
+    "input": false,
+    "from": "samples/dartmouth",
+    "scan": "p21-examples.jpg",
+    "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 21",
+    "prints": "1.5797"
+  },
+  {
+    "file": "example2.bas",
+    "title": "1964: example 2, quadratic equation",
+    "input": false,
+    "from": "samples/dartmouth",
+    "dialect": "dartmouth",
+    "scan": "p22-results.jpg",
+    "detail": "detail-program-2-line-40.jpg",
+    "credit": "First BASIC instruction manual, Dartmouth, May 1964, pp. 21-22",
+    "prints": "IMAGINARY PART = 1.41421"
+  },
+  {
+    "file": "example3.bas",
+    "title": "1964: example 3, root of a function",
+    "input": false,
+    "from": "samples/dartmouth",
+    "scan": "p23-example-3.jpg",
+    "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 23",
+    "prints": "ROOT = .837585"
+  },
+  {
+    "file": "hello.bas",
+    "title": "Hello, world",
+    "input": false
+  },
+  {
+    "file": "primes.bas",
+    "title": "Primes",
+    "input": false
+  },
+  {
+    "file": "mandelbrot.bas",
+    "title": "Mandelbrot set",
+    "input": false
+  },
+  {
+    "file": "guess.bas",
+    "title": "Guess the number",
+    "input": true
+  },
+  {
+    "file": "hi-lo.bas",
+    "title": "Hi-Lo (game)",
+    "input": true,
+    "credit": "BASIC Computer Games, 1978"
+  },
+  {
+    "file": "hammurabi.bas",
+    "title": "Hammurabi (game)",
+    "input": true,
+    "credit": "BASIC Computer Games, 1978"
+  },
+  {
+    "file": "lunar.bas",
+    "title": "Lunar Lander (game)",
+    "input": true,
+    "credit": "BASIC Computer Games, 1978"
+  },
+  {
+    "file": "superstartrek.bas",
+    "title": "Super Star Trek (game)",
+    "input": true,
+    "credit": "BASIC Computer Games, 1978"
+  },
+  {
+    "file": "diamond.bas",
+    "title": "Diamond (pattern)",
+    "input": true,
+    "credit": "BASIC Computer Games, 1978"
+  }
 ]

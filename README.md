@@ -26,7 +26,7 @@ which had a tokenizer and a parser. No dependencies outside the standard
 library.
 
 - **New to BASIC?** Start with the [tutorial](docs/TUTORIAL.md).
-- **Want something to run?** There are [145 sample programs](samples/README.md).
+- **Want something to run?** There are [150 sample programs](samples/README.md).
 - **No terminal handy?** The [browser playground](web/README.md) runs the same
   interpreter in a web page.
 
@@ -55,6 +55,7 @@ Options:
       --seed <N>       Seed the random number generator (repeatable runs)
       --max-steps <N>  Stop with an error after N operations
       --echo           Echo INPUT lines to the output (for piped input)
+      --dialect <NAME> Arithmetic to follow: microsoft (default) or dartmouth
   -h, --help           Show this help
   -V, --version        Show the version
 ```
@@ -287,6 +288,35 @@ Where the old dialects disagree, this is what chuk-basic does:
   again the way the first Microsoft BASICs read everything, finding keywords
   anywhere - so `FORI=1TO10:PRINTI:NEXTI` works. (On such a line `TOTAL`
   would be `TO TAL`, which is why lines are read the spaced way first.)
+
+### Compared with Dartmouth BASIC, 1964
+
+`samples/dartmouth` holds the programs printed in the first BASIC
+instruction manual (Dartmouth, May 1964), typed in from the
+[scanned pages](docs/scans/README.md). The manual prints their results
+too, and the tests compare ours with the page.
+
+| Program | The 1964 page prints | chuk-basic prints |
+| --- | --- | --- |
+| Preface: `LET X = (7+8)/3` | | `5` |
+| Example 1, average of 100 logs | `1.5797` | `1.57970004` |
+| Example 3, root of a function | `ROOT = .837585` | `ROOT = .837585449` |
+| Example 3 with `EXP(X) - 2` | `ROOT = .693176` | `ROOT = .69317627` |
+| Example 2, quadratic equation | `IMAGINARY PART = 1.41421` | stops: `Illegal function call: SQR` |
+
+Example 2 takes the square root of a negative number on line 40 and relies
+on a rule the manual states on page 5: "the square-root is always taken of
+the absolute value". Every later BASIC treats that as an error, and so does
+chuk-basic unless asked otherwise:
+
+```bash
+chuk-basic --dialect dartmouth samples/dartmouth/example2.bas   # IMAGINARY PART= 1.41421356
+```
+
+`--dialect dartmouth` makes `SQR` and powers take the absolute value, as
+the manual describes (`A ↑ B` "is actually interpreted as |A|^B"). The
+upwards arrow is accepted for powers in any dialect. Compiled programs take
+the same option.
 
 ### Compared with GW-BASIC
 

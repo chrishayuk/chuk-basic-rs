@@ -18,6 +18,7 @@ use std::io::{BufRead, Write};
 use crate::error::{Error, ErrorKind, Result};
 use crate::interp::Interpreter;
 use crate::parser::parse;
+use crate::rt::Dialect;
 
 const HELP: &str = "\
 Type a line starting with a number to add it to the program:
@@ -43,6 +44,8 @@ pub struct Options {
     pub step_limit: Option<u64>,
     /// Copy lines read by INPUT to the output.
     pub echo: bool,
+    /// Which BASIC's arithmetic to follow.
+    pub dialect: Dialect,
 }
 
 /// The program being edited: its lines as typed, by line number.
@@ -213,6 +216,7 @@ fn execute(
     let mut interpreter = Interpreter::new(parse(source)?, input, output, options.seed)?;
     interpreter.set_step_limit(options.step_limit);
     interpreter.set_echo_input(options.echo);
+    interpreter.set_dialect(options.dialect);
     let result = interpreter.run();
     // finish a line that the program left half printed
     let mid_line = interpreter.column() > 0;

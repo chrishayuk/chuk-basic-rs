@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::io::{BufReader, LineWriter};
 
 use chuk_basic::error::{Error, ErrorKind, Result};
-use chuk_basic::rt::{Arrays, Console, DataPool, Rnd, Value};
+use chuk_basic::rt::{Arrays, Console, DataPool, Dialect, Rnd, Value};
 
 /// Each BASIC call nests WebAssembly frames; kept the same as the
 /// interpreter's limit so that both stop at the same depth.
@@ -113,6 +113,7 @@ pub struct Runtime {
     pub line: Option<u32>,
     pub steps: u64,
     pub step_limit: Option<u64>,
+    pub dialect: Dialect,
 }
 
 thread_local! {
@@ -129,6 +130,7 @@ struct Options {
     seed: Option<u64>,
     step_limit: Option<u64>,
     echo: bool,
+    dialect: Dialect,
 }
 
 fn options() -> Options {
@@ -136,6 +138,7 @@ fn options() -> Options {
         seed: None,
         step_limit: None,
         echo: false,
+        dialect: Dialect::default(),
     };
     let mut args = std::env::args().skip(1);
     let number = |args: &mut dyn Iterator<Item = String>, flag: &str| match args
@@ -153,8 +156,15 @@ fn options() -> Options {
             "--seed" => options.seed = number(&mut args, "--seed"),
             "--max-steps" => options.step_limit = number(&mut args, "--max-steps"),
             "--echo" => options.echo = true,
+            "--dialect" => match args.next().as_deref().and_then(Dialect::from_name) {
+                Some(dialect) => options.dialect = dialect,
+                None => {
+                    eprintln!("--dialect needs microsoft or dartmouth");
+                    std::process::exit(2);
+                }
+            },
             other => {
-                eprintln!("Unknown option: {other}\nOptions: --seed <N>, --max-steps <N>, --echo");
+                eprintln!("Unknown option: {other}\nOptions: --seed <N>, --max-steps <N>, --echo, --dialect <NAME>");
                 std::process::exit(2);
             }
         }
@@ -192,6 +202,7 @@ pub fn init(numbers: usize, strings: usize) {
         line: None,
         steps: 0,
         step_limit: options.step_limit,
+        dialect: options.dialect,
     };
     RUNTIME.set(Some(runtime));
 }

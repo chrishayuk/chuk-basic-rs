@@ -345,7 +345,8 @@ impl Line {
             ('-', _) => (Tok::Minus, 1),
             ('*', _) => (Tok::Star, 1),
             ('/', _) => (Tok::Slash, 1),
-            ('^', _) => (Tok::Caret, 1),
+            // the 1964 manual writes powers with an upwards arrow, as its teletypes did
+            ('^' | '↑', _) => (Tok::Caret, 1),
             (',', _) => (Tok::Comma, 1),
             (';', _) => (Tok::Semi, 1),
             (':', _) => (Tok::Colon, 1),

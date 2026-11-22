@@ -22,7 +22,7 @@ use std::rc::Rc;
 
 use crate::ast::Program;
 use crate::error::{AtLine, Error, Result};
-use crate::rt::{Arrays, Console, DataPool, Rnd, Value};
+use crate::rt::{Arrays, Console, DataPool, Dialect, Rnd, Value};
 use lower::{lower, Func, Op};
 
 /// Each BASIC call nests several interpreter frames on the native stack, so
@@ -67,6 +67,7 @@ pub struct Interpreter<'a> {
     data: DataPool,
     console: Console<'a>,
     rnd: Rnd,
+    dialect: Dialect,
 
     for_stack: Vec<ForFrame>,
     gosub_stack: Vec<GosubFrame>,
@@ -102,6 +103,7 @@ impl<'a> Interpreter<'a> {
             data: c.data,
             console: Console::new(input, output),
             rnd: Rnd::new(seed),
+            dialect: Dialect::default(),
             for_stack: Vec::new(),
             gosub_stack: Vec::new(),
             fn_gosub_base: 0,
@@ -125,6 +127,11 @@ impl<'a> Interpreter<'a> {
     /// comes from a file or a pipe.
     pub fn set_echo_input(&mut self, echo: bool) {
         self.console.set_echo(echo);
+    }
+
+    /// Follow another BASIC's arithmetic (see [`Dialect`]).
+    pub fn set_dialect(&mut self, dialect: Dialect) {
+        self.dialect = dialect;
     }
 
     /// The column the output cursor is in (0 at the start of a line).
