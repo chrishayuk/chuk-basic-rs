@@ -29,15 +29,12 @@ fn no_sample_has_an_error_but_the_one_that_does() {
     for path in samples {
         for d in diagnostics(&read(&path), Lint::Later) {
             assert_eq!(d.severity, Severity::Error);
-            found.push(format!(
-                "{}:{}: {}",
-                path.display(),
-                d.at.line + 1,
-                d.message
-            ));
+            // only the name of the file, so the test reads the same on every system
+            let name = path.file_name().unwrap().to_string_lossy();
+            found.push(format!("{name}:{}: {}", d.at.line + 1, d.message));
         }
     }
-    assert_eq!(found, ["samples/games/splat.bas:75: There is no line 540"]);
+    assert_eq!(found, ["splat.bas:75: There is no line 540"]);
 }
 
 /// Old listings fed the answers a player might type, before and after.

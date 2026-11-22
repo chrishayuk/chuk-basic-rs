@@ -51,3 +51,43 @@ jobs:
           npm ci
           npm run build
           npm test
+
+  # The interpreter's own tests, and the extension in a real VS Code, on the
+  # three systems people use.
+  editor:
+    name: VS Code extension (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-wasip1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Test the interpreter and language server (native)
+        run: cargo test
+
+      - name: Build the extension and run its node tests
+        working-directory: editors/vscode
+        run: |
+          npm ci
+          npm run build
+          npm test
+
+      - name: Run the extension in a real VS Code (Linux, on a virtual screen)
+        if: runner.os == 'Linux'
+        working-directory: editors/vscode
+        run: xvfb-run -a npm run test:vscode
+
+      - name: Run the extension in a real VS Code
+        if: runner.os != 'Linux'
+        working-directory: editors/vscode
+        run: npm run test:vscode
