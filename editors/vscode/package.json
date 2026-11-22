@@ -4,7 +4,7 @@
   "description": "Line-numbered BASIC with nothing else to install: syntax highlighting, errors as you type, line numbers as links, renumbering, a run button and a 1964 Dartmouth mode.",
   "version": "0.1.2",
   "publisher": "chrishayuk",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/chrishayuk/chuk-basic-rs"

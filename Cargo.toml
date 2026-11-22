@@ -3,7 +3,7 @@ name = "chuk-basic"
 version = "0.1.2"
 edition = "2021"
 description = "A BASIC interpreter (Dartmouth / Vintage / Microsoft flavours) that runs natively or as WebAssembly + WASI"
-license = "MIT"
+license = "Apache-2.0"
 
 [lib]
 name = "chuk_basic"

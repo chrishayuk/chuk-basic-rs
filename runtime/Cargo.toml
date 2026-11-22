@@ -3,7 +3,7 @@ name = "chuk-basic-rt"
 version = "0.1.2"
 edition = "2021"
 description = "Runtime library that BASIC programs compiled to WebAssembly are linked against"
-license = "MIT"
+license = "Apache-2.0"
 publish = false
 
 [lib]

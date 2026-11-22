@@ -568,5 +568,5 @@ collection. See [samples/README.md](samples/README.md).
 
 ## Licence
 
-MIT - see [LICENSE](LICENSE). The programs in `samples/games` are in the
+Apache License 2.0 - see [LICENSE](LICENSE). The programs in `samples/games` are in the
 public domain.
