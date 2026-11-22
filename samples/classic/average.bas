@@ -1,0 +1,15 @@
+10 REM Read numbers from the keyboard until a blank line or zero
+20 PRINT "ENTER NUMBERS, ONE PER LINE. ENTER 0 TO FINISH."
+30 N = 0: S = 0
+40 INPUT X
+50 IF X = 0 THEN 100
+60 IF N = 0 THEN L = X: H = X
+70 IF X < L THEN L = X
+80 IF X > H THEN H = X
+90 N = N + 1: S = S + X: GOTO 40
+100 IF N = 0 THEN PRINT "NOTHING ENTERED.": END
+110 PRINT "COUNT:"; N
+120 PRINT "SUM:"; S
+130 PRINT "AVERAGE:"; S / N
+140 PRINT "LOWEST:"; L; " HIGHEST:"; H
+150 END

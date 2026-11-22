@@ -1,0 +1,16 @@
+? 21
+ 42 
+NAME? ADA
+HI ADA
+TWO? 3,4
+ 7 
+S AND N? X,5
+X 5 
+NOQ9
+ 9 
+?   PADDED  
+[PADDED]
+? -2.5
+-2.5 
+? "A,B",C
+A,B|C

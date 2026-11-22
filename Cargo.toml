@@ -1,0 +1,19 @@
+[package]
+name = "chuk-basic"
+version = "0.1.0"
+edition = "2021"
+description = "A BASIC interpreter (Dartmouth / Vintage / Microsoft flavours) that runs natively or as WebAssembly + WASI"
+license = "MIT"
+
+[lib]
+name = "chuk_basic"
+path = "src/lib.rs"
+
+[[bin]]
+name = "chuk-basic"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = true
+strip = true

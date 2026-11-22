@@ -1,0 +1,15 @@
+10 DIM S(5)
+20 FOR I = 1 TO 5: S(I) = I * 10: NEXT I
+30 T = 0
+40 FOR I = 1 TO 5: T = T + S(I): NEXT I
+50 PRINT "TOTAL:"; T; " AVERAGE:"; T / 5
+60 DIM G(3, 3)
+70 FOR R = 1 TO 3: G(R, R) = 1: NEXT R
+80 FOR R = 1 TO 3
+90   FOR C = 1 TO 3: PRINT G(R, C);: NEXT C
+100   PRINT
+110 NEXT R
+120 DIM N$(2)
+130 N$(0) = "ZERO": N$(1) = "ONE": N$(2) = "TWO"
+140 FOR I = 2 TO 0 STEP -1: PRINT N$(I); " ";: NEXT I
+150 PRINT

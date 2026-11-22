@@ -1,0 +1,16 @@
+10 REM Sieve of Eratosthenes: the primes below 100
+20 N = 100
+30 DIM C(N)
+40 FOR I = 2 TO SQR(N)
+50   IF C(I) = 1 THEN 90
+60   FOR J = I * I TO N STEP I
+70     C(J) = 1
+80   NEXT J
+90 NEXT I
+100 K = 0
+110 FOR I = 2 TO N
+120   IF C(I) = 0 THEN PRINT I;: K = K + 1
+130 NEXT I
+140 PRINT
+150 PRINT K; "PRIMES"
+160 END

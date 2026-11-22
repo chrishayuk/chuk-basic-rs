@@ -1,0 +1,9 @@
+10 A(3)=7: PRINT A(3);A(10);A(0)
+20 DIM B(2,3): B(2,3)=9: B(0,0)=1: PRINT B(2,3);B(0,0);B(1,1)
+30 X=5: X(1)=6: PRINT X;X(1)
+40 DIM N$(2): N$(1)="ONE": PRINT N$(1);"|";N$(2);"|"
+50 I=2: A(I+1)=A(I+1)+1: PRINT A(3)
+60 A(1.4)=11: A(1.6)=22: PRINT A(1);A(2)
+70 DIM C(1): C(1)=5: PRINT C(1)
+80 FOR I=0 TO 10: A(I)=I*I: NEXT: T=0: FOR I=0 TO 10: T=T+A(I): NEXT: PRINT T
+90 M=3: DIM D(M*2): D(6)=1: PRINT D(6)
