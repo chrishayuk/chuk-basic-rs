@@ -29,8 +29,12 @@
 <main>
   <section class="pane">
     <h2>Program</h2>
-    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
-              autocorrect="off" wrap="off" aria-label="BASIC program"></textarea>
+    <div class="editor-wrap">
+      <pre id="highlight" aria-hidden="true"></pre>
+      <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+                autocorrect="off" wrap="off" aria-label="BASIC program"></textarea>
+    </div>
+    <div id="problems" role="status" aria-live="polite"></div>
   </section>
 
   <section class="pane">
@@ -51,6 +55,8 @@
 <footer>
   A BASIC interpreter written in Rust, running in your browser as WebAssembly + WASI.
 </footer>
+
+<div id="tip" class="tip" hidden></div>
 
 <script type="module" src="app.js"></script>
 </body>

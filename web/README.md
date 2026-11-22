@@ -8,6 +8,13 @@ JavaScript. No build step for the page, no npm packages, nothing from a CDN.
 Edit a program, press **Run** (or Ctrl+Enter), and answer its `INPUT`
 prompts in the line under the output.
 
+The program box understands the language: it is coloured as you type,
+mistakes that can be found without running (a jump to a line that is not
+there, a syntax error) are underlined and listed under it, and resting the
+pointer on a word says what it does. All of that is the language server -
+the same `chuk-basic --lsp` an editor uses - running in the page. For the
+programs from the 1964 manual it also marks what 1964 BASIC did not have.
+
 ## Build and serve
 
 ```bash
@@ -33,6 +40,7 @@ the playground, run `web/build.sh` and upload the contents of `web/`.
 | `wasi.js` | a small WASI preview 1 host: arguments, an in-memory file system holding the program, captured stdout/stderr, stdin from a list of lines. No DOM, so it also runs under node |
 | `session.js` | `runProgram` (one run, with a status) and `Session` (the re-run trick below). Shared by the page and the tests |
 | `worker.js` | runs `runProgram` off the main thread |
+| `editor.js` | makes the text box understand BASIC, with no library: the program in colour in a layer under the box, problems underlined and listed, and hover help. It asks `lsp-worker.js` |
 | `lsp-worker.js` | the language server in the page: one short run of `chuk-basic.wasm --lsp` per question (open this text, answer these requests), for an editor's colours, problems, hover and completion |
 | `examples/` | programs for the drop-down and `index.json` listing them, written by `build-examples.mjs` from `samples/` and `featured.json` |
 | `test.mjs` | tests, under node |

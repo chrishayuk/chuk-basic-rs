@@ -3,6 +3,7 @@
 // The interesting parts are elsewhere: wasi.js is the WASI host and
 // session.js runs programs and implements the re-run trick for INPUT.
 
+import { attach } from "./editor.js";
 import { DEFAULT_MAX_STEPS, Session, randomSeed, runProgram } from "./session.js";
 
 const WASM_URL = new URL("./chuk-basic.wasm", import.meta.url);
@@ -111,6 +112,16 @@ const dialects = new Map();
 /** The arithmetic to run the program in the editor with. */
 let dialect = "microsoft";
 let runningTimer = 0;
+
+// colours, problems and hover, from the language server; held to 1964 for
+// the programs that are 1964's
+const smart = attach(editor, {
+  layer: $("highlight"),
+  problems: $("problems"),
+  tip: $("tip"),
+  wasmUrl: WASM_URL,
+  dialect: () => (dialect === "dartmouth" ? "dartmouth" : "later"),
+});
 
 function setStatus(text, kind = "") {
   statusLine.textContent = text;
@@ -280,6 +291,7 @@ async function loadExample(file) {
     loadedExample = text;
     // the 1964 manual's programs expect Dartmouth's arithmetic
     dialect = dialects.get(file) || "microsoft";
+    smart.refresh();
     renderTranscript([]);
     if (runner !== null) setStatus("Ready - press Run");
   } catch (error) {

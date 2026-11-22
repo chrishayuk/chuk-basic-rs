@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 
 import { Session, localRunner, runProgram, transcriptText } from "./session.js";
 import { ask } from "./lsp-worker.js";
+import { renderHover, renderLines } from "./editor.js";
 
 const web = dirname(fileURLToPath(import.meta.url));
 const root = join(web, "..");
@@ -217,6 +218,21 @@ await test("the language server is quick enough to ask on every keystroke", () =
   console.log(`     (Super Star Trek, ${text.split("\n").length} lines: ${took} ms, ${answer.results[0].data.length / 5} tokens)`);
   assert.deepEqual(answer.diagnostics, []);
   assert.ok(took < 1500, `${took} ms`);
+});
+
+await test("the page's editor turns the server's answer into coloured, underlined text", () => {
+  const text = "10 IF X < 1 THEN 90\n20 END";
+  const answer = ask(module, { text, requests: [{ method: "textDocument/semanticTokens/full" }, { method: "textDocument/hover", params: { position: { line: 1, character: 4 } } }] });
+  const [first, second] = renderLines(text, answer.results[0].data, answer.diagnostics);
+  assert.equal(
+    first,
+    '<span class="tok-label">10</span> <span class="tok-keyword">IF</span> <span class="tok-variable">X</span> ' +
+      '<span class="tok-operator">&lt;</span> <span class="tok-number">1</span> <span class="tok-keyword">THEN</span> ' +
+      '<span class="tok-label problem-error">90</span>',
+  );
+  assert.equal(second, '<span class="tok-label">20</span> <span class="tok-keyword">END</span>');
+  assert.deepEqual(renderLines("A<B\n", [], []), ["A&lt;B", ""]);
+  assert.match(renderHover(answer.results[1].contents.value), /^<pre>END<\/pre><p>Stops the program.*<p><em>In BASIC since 1964.<\/em><\/p>$/);
 });
 
 // the bundled examples

@@ -9,6 +9,11 @@
   --typed: #0b5fb0;
   --error: #b3261e;
   --term-bg: #fbfaf7;
+  --tok-string: #2f7d3f;
+  --tok-number: #2a6fa8;
+  --tok-function: #8a3f96;
+  --tok-keyword: #a82a33;
+  --tok-label: #b3600f;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
 }
 
@@ -24,6 +29,11 @@
     --typed: #7ab8ff;
     --error: #ff8a80;
     --term-bg: #111315;
+    --tok-string: #8fd49b;
+    --tok-number: #86c0f0;
+    --tok-function: #d7a0e0;
+    --tok-keyword: #ff9aa2;
+    --tok-label: #f0b46a;
   }
 }
 
@@ -141,15 +151,86 @@ h2 {
   tab-size: 8;
 }
 
-#editor {
+/* the program: a text box, with the same text in colour underneath it */
+.editor-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+#editor, #highlight {
   width: 100%;
-  resize: none;
+  margin: 0;
   padding: 10px 12px;
-  background: var(--panel);
-  color: var(--text);
   white-space: pre;
   overflow: auto;
 }
+#editor {
+  resize: none;
+  position: relative;
+  background: transparent;
+  color: var(--text);
+  caret-color: var(--text);
+}
+#editor.coloured { color: transparent; }
+#highlight {
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font: 13px/1.35 var(--mono);
+  tab-size: 8;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tok-comment { color: var(--muted); font-style: italic; }
+.tok-string { color: var(--tok-string); }
+.tok-number { color: var(--tok-number); }
+.tok-function { color: var(--tok-function); }
+.tok-keyword { color: var(--tok-keyword); font-weight: 600; }
+.tok-label { color: var(--tok-label); }
+.problem-error { text-decoration: underline wavy var(--error); text-decoration-skip-ink: none; }
+.problem-warning { text-decoration: underline wavy var(--tok-label); text-decoration-skip-ink: none; }
+
+#problems {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  min-height: 22px;
+  padding-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+#problems button {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: var(--tok-label);
+}
+#problems button.error { color: var(--error); }
+
+.tip {
+  position: fixed;
+  z-index: 10;
+  max-width: min(400px, 86vw);
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 6px 24px #0003;
+  font-size: 13px;
+}
+.tip p { margin: 0 0 6px; }
+.tip p:last-child { margin-bottom: 0; }
+.tip em { color: var(--muted); }
+.tip pre, .tip code { font: 12px/1.4 var(--mono); }
+.tip pre { margin: 0 0 6px; padding: 5px 8px; background: var(--bg); overflow: auto; }
 
 .terminal {
   display: flex;
