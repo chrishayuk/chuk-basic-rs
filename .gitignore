@@ -3,3 +3,4 @@ target/
 # the prebuilt runtime library that --compile links programs against
 !runtime/chuk_basic_rt.wasm
 .DS_Store
+__pycache__/
