@@ -51,11 +51,15 @@ chuk-basic --seed 42 --echo samples/classic/guess.bas < samples/classic/guess.in
 
 ## Games
 
-The programs in `samples/games` are the original BASIC listings from David
-H. Ahl's *BASIC Computer Games* (Creative Computing, 1978), unmodified, as
-collected in the
+The programs in `samples/games` are the BASIC listings of David H. Ahl's
+*BASIC Computer Games* (Creative Computing, 1978) as collected in the
 [coding-horror/basic-computer-games](https://github.com/coding-horror/basic-computer-games)
 repository, which is released into the public domain under the Unlicense.
+They are byte for byte the files in that repository (compared on 22
+November 2026, at commit `a81c331`). They are not necessarily the book as
+printed: the collection took them from Vintage BASIC's site, where Lyle
+Kopnicky "normalized" them and "tested and tweaked each one of them" to run
+under Vintage BASIC, and they have not been checked against the book here.
 
 They were written by many people for several dialects of BASIC, so they make
 a demanding compatibility test: all 103 load and run here.

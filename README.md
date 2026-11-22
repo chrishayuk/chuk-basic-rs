@@ -5,7 +5,10 @@ the browser, and a compiler that turns BASIC programs into WebAssembly.
 
 It speaks the line-numbered BASIC of the 1960s and 70s - Dartmouth BASIC,
 Microsoft (Altair) BASIC and Vintage BASIC - well enough to run all 103
-programs of *BASIC Computer Games* unmodified, Super Star Trek included.
+programs of *BASIC Computer Games*, Super Star Trek included, without
+changing them. They are the listings as the coding-horror collection has
+them, which Lyle Kopnicky normalised to run under Vintage BASIC; they have
+not been checked against the printed book.
 
 ```basic
 10 PRINT "HELLO, WORLD!"
@@ -319,7 +322,8 @@ Where the old dialects disagree, this is what chuk-basic does:
   Subscripts are rounded to the nearest whole number.
 - **`RND(x)`**: a positive `x` gives the next random number in [0, 1), 0
   repeats the last one, and a negative `x` reseeds. Each run is different
-  unless `--seed` is given.
+  unless `--seed` is given; then a `RANDOMIZE` without a number reseeds
+  from the generator rather than the clock, so the run repeats exactly.
 - **`INPUT`** asks again with `?REDO FROM START` after a bad number, and with
   `??` if more values are needed.
 - **Lines** run in line-number order. Lines without numbers are allowed, and
@@ -337,8 +341,10 @@ Where the old dialects disagree, this is what chuk-basic does:
 
 `samples/dartmouth` holds the programs printed in the first BASIC
 instruction manual (Dartmouth, May 1964), typed in from the
-[scanned pages](docs/scans/README.md). The manual prints their results
-too, and the tests compare ours with the page.
+[scanned pages](docs/scans/README.md). Two characters in them are our
+readings of a damaged page (see [Readings and corrections](#readings-and-corrections)).
+The manual prints their results too, and the tests compare the figures
+and labels with the page's; the layout of the page is not reproduced.
 
 | Program | The 1964 page prints | chuk-basic prints | with `--dialect dartmouth` |
 | --- | --- | --- | --- |
@@ -357,18 +363,62 @@ chuk-basic unless asked otherwise:
 chuk-basic --dialect dartmouth samples/dartmouth/example2.bas   # IMAGINARY PART= 1.41421
 ```
 
-`--dialect dartmouth` changes three things:
+`--dialect dartmouth` changes seven things. From the manual:
 
 - `SQR` takes the absolute value of its argument, as page 5 says.
 - So does a power: `A ↑ B` "is actually interpreted as |A|^B".
+- When `READ` finds no data left, "the computer stops" (page 15): the
+  program ends without an error message, as the results on page 22 show.
 - `PRINT` shows a number as the results on pages 21 to 23 do: six
-  significant digits, and a point after a whole number (`3.`). The
-  beginners' part of the manual states no rule for this; it is copied from
-  those pages.
+  significant digits for a number that is not whole, and a point after a
+  whole number (`3.`). The beginners' part of the manual states no rule for
+  this; it is copied from those pages. They print no whole number of more
+  than one digit, so a long one is printed in full (`1234567.`), which is
+  our choice.
+
+The manual leaves `INT` and `RND` to its Part II, which Dartmouth's reprint
+does not include, and does not say how a leading minus binds. For these
+the dialect follows Thomas Kurtz's 2005 account of
+[the original BASIC](https://www.dartmouth.edu/basicfifty/commands.html):
+
+- `INT` is "the integer part (truncating toward 0)": `INT(-1.5)` is -1,
+  not -2.
+- The argument of `RND` "is ignored": `RND(0)` gives the next number
+  rather than repeating the last.
+- "-x^2 is understood to be (-x)^2", so `-2^2` is 4. With brackets,
+  `-(2^2)`, it is -4 in either dialect.
 
 It does not make the interpreter refuse what later BASICs added (`INPUT`,
 strings, `ELSE`). The upwards arrow is accepted for powers in any dialect.
-Compiled programs take the same option.
+Compiled programs take the same option. Where the 1964 system's behaviour
+is documented nowhere - the digits of its 30-bit arithmetic, its random
+numbers, its print zones (Kurtz gives 15 columns; this keeps 14) - a 1964
+program can still print something different here.
+
+### Readings and corrections
+
+What this repository changes or chooses in reading its sources, by kind:
+a *slip* is wrong under any reading of the source; a *conflict* is where
+the sources say two things; an *interpretation* is our reading of what was
+meant; *ours* is a consequence of choices made in this reconstruction.
+
+| Where | What | Kind |
+| --- | --- | --- |
+| Manual p. 21, example 2, line 50 | The relation is smudged. It is typed as `IF D = 0`: of the six relations the manual allows (p. 12), only `=` gives the results printed on p. 22. | interpretation |
+| Manual p. 23, example 3, line 160 | A damaged glyph that looks like ≤, typed as `<=`. `<` would print the same for both functions. | interpretation |
+| Manual p. 22, results | Prints `READ PART`; the program on the same page says `"REAL PART="`. We follow the program. | conflict |
+| Manual p. 22, results | Spaces before `=` that the program's strings lack; columns that follow no single zone width; `TIME:` lines. Not reproduced. | ours |
+| Manual p. 4 and Kurtz | The manual counts fourteen operations ("13 other" and `END`); Kurtz lists fifteen statements. The 1964 checks use Kurtz's list. | conflict |
+| Manual pp. 21-23 | Six significant digits, and a point after a whole number, inferred from the printed results; whole numbers in full. | interpretation; ours for long whole numbers |
+| Manual p. 15 | Running out of data ends the program quietly. | interpretation |
+| Kurtz, 2005 | `INT`, `RND` and the leading minus, taken as describing the system of May 1964, about which the manual is silent. | interpretation |
+| `samples/games/splat.bas` | `GOTO 540`, and no line 540. Present in the coding-horror listing; the printed book has not been checked. | slip (in that listing) |
+| `samples/games/diamond.bas` | Draws correctly only with `TAB` counting from 0 and never moving back. Not a defect in the listing: a compatibility choice. | ours |
+
+Nothing else in the transcriptions is changed. Example 3's variant really
+does write `DEF FNF(Z) = EXP(X) -2`, using `X` rather than its argument
+`Z`; it works because `X` is the variable the program is changing, and it
+is typed as printed.
 
 ### Compared with GW-BASIC
 
@@ -376,9 +426,13 @@ The interpreter has been run side by side with
 [PC-BASIC](https://robhagemans.github.io/pcbasic/), an independent and
 careful emulation of Microsoft GW-BASIC. The 22 programs in
 `tests/conformance` - expressions, loops, strings, `PRINT` layout, `INPUT`,
-`READ`/`DATA`, arrays, functions - print byte-for-byte the same in both, and
-so do most of the classic and tutorial samples. `scripts/pcbasic-diff.py`
-repeats the comparison.
+`READ`/`DATA`, arrays, functions - print the same in both, byte for byte on
+standard output, once PC-BASIC's line endings and its closing `Ok` prompt
+are normalised (PC-BASIC 2.0.8, 22 November 2026). Error messages and exit
+statuses are not compared. Of the 35 classic and tutorial samples, 20 print
+exactly the same and one differs only in trailing spaces; the others differ
+in spacing (`TAB`), in wrapping at 80 columns, in precision or in random
+numbers. `scripts/pcbasic-diff.py` repeats the comparison and says which.
 
 Where the two differ, it is on purpose. chuk-basic follows the earlier
 Microsoft BASICs that the 1970s listings were written for:
@@ -431,12 +485,17 @@ dependencies either; the JSON is in `src/lsp/json.rs`.
 Set the dialect to `dartmouth` and it also marks, as warnings, whatever the
 BASIC of 1964 did not have: `INPUT`, a missing `LET`, two instructions on a
 line, a variable called `TOTAL` or `N$`, a function outside the original
-ten, a program that does not end with `END`. The fifteen statements and ten
-functions it allows are the ones Thomas Kurtz lists for
-[the original BASIC](https://www.dartmouth.edu/basicfifty/commands.html);
+ten, a program that does not end with `END`, an `IF` without a relation or
+with a statement after `THEN`, a `DEF` with more than one argument, a number
+of more than nine digits. The fifteen statements and ten functions it
+allows are the ones Thomas Kurtz lists for
+[the original BASIC](https://www.dartmouth.edu/basicfifty/commands.html)
+(the manual itself counts fourteen operations; see above);
 the manual's own programs in `samples/dartmouth` pass without a mark, and
-every one of the 103 listings from 1978 gets at least one. The interpreter
-itself still runs all of it.
+every one of the 103 listings from 1978 gets at least one. These are checks
+of vocabulary and of a few statement forms, not a full grammar of 1964
+BASIC, so a program that passes them is not proved to be one the 1964
+system would accept. The interpreter itself still runs all of it.
 
 [`editors/vscode`](editors/vscode/README.md) is an extension for VS Code:
 syntax highlighting for `.bas` files, the language server, and commands to
@@ -453,7 +512,8 @@ chuk-basic --renumber program.bas > renumbered.bas
 
 `--check` exits with status 1 if it finds an error. Run over the samples it
 finds one: `samples/games/splat.bas` has a `GOTO 540` and no line 540, as
-the 1978 listing does. `--renumber` refuses, with a reason, a program it
+the listing in the coding-horror collection does (the printed book has not
+been checked). `--renumber` refuses, with a reason, a program it
 cannot be sure of: one that does not parse, or one with a jump written into
 a run of letters (`ONXGOTO30`).
 
@@ -530,7 +590,7 @@ so that `GOTO` - which can go anywhere - is "set the counter and go round".
 `PRINT "HELLO"` through strings, `PRINT USING`, `MAT`, a complete game, the
 1964 Dartmouth dialect, interactive mode and compiling to WebAssembly, to a
 reference. Every program in it is followed by its output, and
-`python3 tutorial/check_tutorial.py` runs all 230 and compares (`--wasm`
+`python3 tutorial/check_tutorial.py` runs all 232 and compares (`--wasm`
 also compiles each one and runs it in wasmtime).
 
 `tutorial/dataset/basic.jsonl` is a small chat-format training set about
@@ -547,7 +607,7 @@ cargo test
 | --- | --- |
 | unit tests in `src/` | the lexer, the parser, the runtime pieces, the WebAssembly encoder and linker, interactive mode |
 | `tests/language.rs` | every statement, function and error, source in and output out |
-| `tests/golden.rs` | saved transcripts: the classic and tutorial programs, eight picture-drawing games, the conformance programs (whose output PC-BASIC agrees with) and the extensions |
+| `tests/golden.rs` | saved transcripts: the classic and tutorial programs, eight picture-drawing games, the conformance programs (whose standard output PC-BASIC agrees with) and the extensions |
 | `tests/games.rs` | all 103 games parse and survive a player typing at random; Hi-Lo is beaten by binary search; Lunar Lander's free fall matches the physics worked out by hand |
 | `tests/compiled.rs` | every program compiled to WebAssembly prints what the interpreter prints (needs wasmtime) |
 | `tests/tutorial.rs` | every program in the tutorial's 22 chapters prints the output shown under it |

@@ -10,7 +10,7 @@ actually printed.
 | File in `dartmouth-1964/` | What it shows |
 | --- | --- |
 | `cover.jpg`, `title-page.jpg` | The reprint's cover, and the 1964 title page |
-| `p01-preface.jpg` | The four requirements, and the first BASIC program in print |
+| `p01-preface.jpg` | The four requirements, and the preface's example program |
 | `p04-instruction-format.jpg` | Line numbers; "There are only 13 other operations" |
 | `p05-formulas.jpg` | Numbers, variables, the arrow for powers, the ten functions |
 | `p21-examples.jpg`, `p22-results.jpg` | Example programs 1 and 2, with their printed results |
@@ -29,10 +29,22 @@ Where to look:
   `detail-sqr-absolute-value.jpg`. Example 2 relies on it at line 40
   (`detail-program-2-line-40.jpg`); run it with `--dialect dartmouth`.
 
-Two things on these pages are not reproduced exactly in the samples: line 50
-of example 2 is smudged and is typed as `IF D = 0`, which is what its
-printed result requires; and the comparison on line 160 of example 3 is
-typed as `<=`.
+Two characters in the samples are our readings of damaged print, and
+nothing else in them is changed:
+
+- Line 50 of example 2 is smudged. It is typed as `IF D = 0`. Of the six
+  relations the manual allows (p. 12), only `=` gives the results printed
+  on p. 22, but the scan itself does not show which was printed.
+- The relation on line 160 of example 3 is damaged and looks like ≤. It is
+  typed as `<=`. Typed as `<` the program prints the same for both
+  functions, so the results do not decide it.
+
+The printed results are not reproduced exactly either. Page 22 prints
+`READ PART` where the program on pages 21-22 says `"REAL PART="` (the tests
+follow the program); it has spaces before `=` that the program's strings
+do not have, columns that follow no single zone width, and `TIME:` lines
+that the 1964 system added. The tests compare the figures and labels, not
+the layout. The README's "Readings and corrections" lists these by kind.
 
 The manual is the work of Dartmouth College; these pages are reproduced for
 reference and research, with their source. Check that you are comfortable
