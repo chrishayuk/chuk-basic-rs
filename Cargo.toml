@@ -14,10 +14,13 @@ name = "chuk-basic"
 path = "src/main.rs"
 
 [features]
-default = ["compiler"]
+default = ["compiler", "editor"]
 # `--compile`, which embeds the runtime library (250 KB). The browser
 # playground is built without it.
 compiler = []
+# `--lsp`, `--check` and `--renumber`: what an editor uses. Left out of the
+# browser playground too.
+editor = []
 
 [workspace]
 members = ["runtime"]

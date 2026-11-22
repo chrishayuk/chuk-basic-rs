@@ -10,10 +10,12 @@
 //! assert_eq!(output, b"HELLO\n");
 //! ```
 
+pub mod analysis;
 pub mod ast;
 pub mod error;
 pub mod interp;
 pub mod lexer;
+pub mod lsp;
 pub mod parser;
 pub mod repl;
 pub mod rt;

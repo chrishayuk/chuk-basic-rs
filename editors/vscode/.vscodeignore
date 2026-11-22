@@ -1,0 +1,9 @@
+.vscode-test/**
+test/**
+scripts/**
+.gitignore
+*.vsix
+node_modules/.bin/**
+node_modules/@vscode/**
+node_modules/vscode-oniguruma/**
+node_modules/vscode-textmate/**

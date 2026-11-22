@@ -30,6 +30,8 @@ library.
 - **Want something to run?** There are [150 sample programs](samples/README.md).
 - **No terminal handy?** The [browser playground](web/README.md) runs the same
   interpreter in a web page.
+- **Writing BASIC?** There is a [VS Code extension](editors/vscode/README.md)
+  with highlighting and a language server.
 
 ## Quick start
 
@@ -52,6 +54,9 @@ Options:
       --tokens         Print the token stream instead of running
       --ast            Print the syntax tree as JSON instead of running
       --compile        Compile to WebAssembly instead of running (FILE.wasm)
+      --check          List the mistakes that can be found without running
+      --renumber       Print the program renumbered in tens
+      --lsp            Be a language server for an editor, on stdin and stdout
   -o, --output <FILE>  Where --compile writes its output
       --seed <N>       Seed the random number generator (repeatable runs)
       --max-steps <N>  Stop with an error after N operations
@@ -370,6 +375,50 @@ tolerance, or work in whole numbers.
 - Compiled programs report a string used as a number (or the reverse) when
   the statement runs, as the interpreter does - not when compiling.
 
+## In your editor
+
+`chuk-basic --lsp` is a language server: the same lexer and parser, answering
+an editor's questions over the Language Server Protocol. It has no
+dependencies either; the JSON is in `src/lsp/json.rs`.
+
+| It gives | |
+| --- | --- |
+| Mistakes as you type | every line with a syntax error, not only the first; a `GOTO`, `GOSUB`, `THEN` or `ON` that names a line which is not there, marked on the number; a line number used twice; `WEND` without `WHILE` |
+| Go to definition | from a jump to its line, and from `FNA(...)` to its `DEF` |
+| Find references | from a line, every jump to it; from a variable, every use |
+| Hover | what a statement or function does and whether 1964 BASIC had it; on a jump, the line it goes to |
+| Outline | the subroutines, named by the `REM` at their head, and the `DEF FN`s |
+| Renumber | lines in tens, with every jump changed to match |
+
+Set the dialect to `dartmouth` and it also marks, as warnings, whatever the
+BASIC of 1964 did not have: `INPUT`, a missing `LET`, two instructions on a
+line, a variable called `TOTAL` or `N$`, a function outside the original
+ten, a program that does not end with `END`. The fifteen statements and ten
+functions it allows are the ones Thomas Kurtz lists for
+[the original BASIC](https://www.dartmouth.edu/basicfifty/commands.html);
+the manual's own programs in `samples/dartmouth` pass without a mark, and
+every one of the 103 listings from 1978 gets at least one. The interpreter
+itself still runs all of it.
+
+[`editors/vscode`](editors/vscode/README.md) is an extension for VS Code:
+syntax highlighting for `.bas` files, the language server, and commands to
+run the file, renumber it and switch dialect. Any editor that speaks the
+protocol can use the server.
+
+The same checks work from the command line:
+
+```bash
+chuk-basic --check program.bas                      # file:line:column: error: ...
+chuk-basic --check --dialect dartmouth program.bas  # and what 1964 did not have
+chuk-basic --renumber program.bas > renumbered.bas
+```
+
+`--check` exits with status 1 if it finds an error. Run over the samples it
+finds one: `samples/games/splat.bas` has a `GOTO 540` and no line 540, as
+the 1978 listing does. `--renumber` refuses, with a reason, a program it
+cannot be sure of: one that does not parse, or one with a jump written into
+a run of letters (`ONXGOTO30`).
+
 ## Using it as a library
 
 ```rust
@@ -420,10 +469,15 @@ src/
   wasm/       module.rs    reads the runtime module and adds functions to it
               code.rs      instruction encoder      leb.rs
               gen.rs       expr.rs   stmt.rs   func.rs   code generation
+  analysis/   what an editor asks, answered from the text:
+              scan.rs      words and where they are   diagnostics.rs   original.rs  the 1964 rules
+              navigate.rs  docs.rs   renumber.rs
+  lsp/        mod.rs       the language server        json.rs
   repl.rs     interactive mode
   error.rs    lib.rs       main.rs
 runtime/      the runtime library for compiled programs (a thin layer over rt/)
 web/          the browser playground
+editors/      the VS Code extension
 ```
 
 Both back ends start from the same lowered form, in which `IF` and `WHILE`
@@ -460,6 +514,8 @@ cargo test
 | `tests/compiled.rs` | every program compiled to WebAssembly prints what the interpreter prints (needs wasmtime) |
 | `tests/tutorial.rs` | every program in the tutorial's 22 chapters prints the output shown under it |
 | `tests/samples.rs` | the original samples, including a full game of Basketball |
+| `tests/analysis.rs` | the editor's checks against every sample: no false alarms, and every program prints the same after renumbering |
+| `tests/lsp.rs` | the language server, driven over its standard input and output as an editor drives it |
 | `web/test.mjs` | the playground's WASI shim and session logic, and all 142 of its example programs, in node |
 
 After a deliberate change in behaviour, `UPDATE_GOLDEN=1 cargo test --test

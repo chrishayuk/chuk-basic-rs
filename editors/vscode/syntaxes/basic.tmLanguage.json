@@ -1,0 +1,395 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "BASIC",
+  "scopeName": "source.basic",
+  "patterns": [
+    {
+      "include": "#line"
+    }
+  ],
+  "repository": {
+    "line": {
+      "begin": "^[ \\t]*(\\d+)?[ \\t]*",
+      "beginCaptures": {
+        "1": {
+          "name": "entity.name.label.line-number.basic"
+        }
+      },
+      "end": "$",
+      "patterns": [
+        {
+          "name": "string.quoted.double.basic",
+          "match": "\"[^\"]*\"?"
+        },
+        {
+          "include": "#rem"
+        },
+        {
+          "name": "comment.line.apostrophe.basic",
+          "match": "'.*$"
+        },
+        {
+          "include": "#data"
+        },
+        {
+          "include": "#for"
+        },
+        {
+          "include": "#mat"
+        },
+        {
+          "include": "#jump"
+        },
+        {
+          "include": "#statement"
+        },
+        {
+          "include": "#expression"
+        }
+      ]
+    },
+    "rem": {
+      "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(REM(?![A-Za-z0-9]*[$%]?[ \\t]*=).*)$",
+      "captures": {
+        "1": {
+          "name": "comment.line.rem.basic"
+        }
+      }
+    },
+    "data": {
+      "begin": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(DATA)(?![A-Za-z0-9]*[$%]?[ \\t]*=)",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.data.basic"
+        }
+      },
+      "end": "(?=:)|$",
+      "contentName": "meta.data.basic",
+      "patterns": [
+        {
+          "name": "string.quoted.double.basic",
+          "match": "\"[^\"]*\"?"
+        },
+        {
+          "name": "constant.numeric.basic",
+          "match": "(?i)(?<![A-Za-z0-9.])[-+]?(?:\\d+\\.?\\d*|\\.\\d+)(?:E[-+]?\\d+)?(?![A-Za-z0-9.])"
+        },
+        {
+          "name": "punctuation.separator.basic",
+          "match": ","
+        }
+      ]
+    },
+    "for": {
+      "patterns": [
+        {
+          "begin": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(FOR)(?=[A-Za-z][0-9]?[ \\t]*=)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.basic"
+            }
+          },
+          "end": "(?=:)|$",
+          "patterns": [
+            {
+              "name": "string.quoted.double.basic",
+              "match": "\"[^\"]*\"?"
+            },
+            {
+              "name": "keyword.control.basic",
+              "match": "(?i)TO|STEP"
+            },
+            {
+              "name": "constant.numeric.basic",
+              "match": "(?i)(?:\\d+\\.?\\d*|\\.\\d+)(?:E[-+]?\\d+(?![A-Za-z]))?"
+            },
+            {
+              "name": "support.function.basic",
+              "match": "(?i)(?:LEFT\\$|RIGHT\\$|MID\\$|CHR\\$|STR\\$|SPACE\\$|STRING\\$|INSTR|SIN|COS|TAN|ATN|EXP|ABS|LOG|SQR|INT|FIX|SGN|RND|VAL|LEN|ASC|TAB|SPC)(?=[ \\t]*\\()"
+            },
+            {
+              "name": "entity.name.function.basic",
+              "match": "(?i)FN[A-Za-z][0-9]?(?=[ \\t]*\\()"
+            },
+            {
+              "name": "variable.other.basic",
+              "match": "(?i)[A-Za-z][0-9]?[$%]?"
+            },
+            {
+              "include": "#operators"
+            }
+          ]
+        },
+        {
+          "begin": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(FOR)(?![A-Za-z0-9$%])",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.basic"
+            }
+          },
+          "end": "(?=:)|$",
+          "patterns": [
+            {
+              "name": "string.quoted.double.basic",
+              "match": "\"[^\"]*\"?"
+            },
+            {
+              "name": "keyword.control.basic",
+              "match": "(?i)(?<![A-Za-z])(?:TO|STEP)(?![A-Za-z0-9$%])"
+            },
+            {
+              "name": "keyword.control.basic",
+              "match": "(?i)(?<=[0-9)])(?:TO|STEP)"
+            },
+            {
+              "include": "#expression"
+            }
+          ]
+        }
+      ]
+    },
+    "mat": {
+      "begin": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(MAT)(?![A-Za-z0-9$%])",
+      "beginCaptures": {
+        "1": {
+          "name": "keyword.other.basic"
+        }
+      },
+      "end": "(?=:)|$",
+      "patterns": [
+        {
+          "name": "string.quoted.double.basic",
+          "match": "\"[^\"]*\"?"
+        },
+        {
+          "name": "keyword.other.basic",
+          "match": "(?i)(?<![A-Za-z])(?:READ|PRINT|INPUT)(?![A-Za-z0-9$%])"
+        },
+        {
+          "name": "support.function.matrix.basic",
+          "match": "(?i)(?<![A-Za-z])(?:ZER|CON|IDN|TRN|INV)(?![A-Za-z0-9$%])"
+        },
+        {
+          "include": "#expression"
+        }
+      ]
+    },
+    "jump": {
+      "patterns": [
+        {
+          "begin": "(?i)(GOTO|GOSUB|GO[ \\t]*TO|GO[ \\t]*SUB)[ \\t]*(?=\\d)",
+          "beginCaptures": {
+            "1": {
+              "name": "keyword.control.basic"
+            }
+          },
+          "end": "(?![\\d \\t,])",
+          "patterns": [
+            {
+              "name": "entity.name.label.line-number.reference.basic",
+              "match": "\\d+"
+            },
+            {
+              "name": "punctuation.separator.basic",
+              "match": ","
+            }
+          ]
+        },
+        {
+          "name": "keyword.control.basic",
+          "match": "(?i)GOTO|GOSUB|GO[ \\t]*TO|GO[ \\t]*SUB"
+        },
+        {
+          "match": "(?i)(THEN)(?:[ \\t]*(\\d+)|(?=[ \\t]*(?:PRINT|INPUT|GOTO|GOSUB|GO[ \\t]*TO|LET|IF|FOR|NEXT|READ|RETURN|END|STOP|DIM|ON)))",
+          "captures": {
+            "1": {
+              "name": "keyword.control.basic"
+            },
+            "2": {
+              "name": "entity.name.label.line-number.reference.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?<=[0-9)\"$])(THEN)(?:[ \\t]*(\\d+))?",
+          "captures": {
+            "1": {
+              "name": "keyword.control.basic"
+            },
+            "2": {
+              "name": "entity.name.label.line-number.reference.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?<![A-Za-z])(THEN|ELSE)(?![A-Za-z0-9$%])(?:[ \\t]*(\\d+))?",
+          "captures": {
+            "1": {
+              "name": "keyword.control.basic"
+            },
+            "2": {
+              "name": "entity.name.label.line-number.reference.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(RESTORE)(?![A-Za-z0-9]*[$%]?[ \\t]*=)(?:[ \\t]*(\\d+))?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.basic"
+            },
+            "2": {
+              "name": "entity.name.label.line-number.reference.basic"
+            }
+          }
+        }
+      ]
+    },
+    "statement": {
+      "patterns": [
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(IF)(?=.*(?:THEN|GOTO|GO[ \\t]*TO))",
+          "captures": {
+            "1": {
+              "name": "keyword.control.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(ON)(?=.*(?:GOTO|GOSUB|GO[ \\t]*TO|GO[ \\t]*SUB))",
+          "captures": {
+            "1": {
+              "name": "keyword.control.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(NEXT|RETURN|END|STOP|WHILE|WEND)(?![A-Za-z0-9]*[$%]?[ \\t]*=)",
+          "captures": {
+            "1": {
+              "name": "keyword.control.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(LET)(?:(?![A-Za-z0-9$%])|(?=[A-Za-z][0-9]?[$%]?[ \\t]*[=(]))",
+          "captures": {
+            "1": {
+              "name": "keyword.other.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(LINE[ \\t]*INPUT)(?![A-Za-z0-9]*[$%]?[ \\t]*=)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(PRINT)[ \\t]*(USING)(?![A-Za-z0-9$%])",
+          "captures": {
+            "1": {
+              "name": "keyword.other.basic"
+            },
+            "2": {
+              "name": "keyword.other.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(DEF)(?:(?![A-Za-z0-9$%])|(?=FN))",
+          "captures": {
+            "1": {
+              "name": "keyword.other.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(PRINT|INPUT|READ|DIM|RANDOMIZE|FNEND)(?![A-Za-z0-9]*[$%]?[ \\t]*=)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.basic"
+            }
+          }
+        },
+        {
+          "match": "(?i)(?:\\G|(?<=:)|(?<=then|else))[ \\t]*(\\?)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.basic"
+            }
+          }
+        }
+      ]
+    },
+    "expression": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.basic",
+          "match": "\"[^\"]*\"?"
+        },
+        {
+          "name": "keyword.operator.logical.basic",
+          "match": "(?i)(?<![A-Za-z])(?:AND|OR|NOT)(?![A-Za-z0-9$%])"
+        },
+        {
+          "name": "keyword.operator.logical.basic",
+          "match": "(?i)(?<=[0-9)\"$])(?:AND|OR)(?=[A-Za-z(]|[ \\t]*NOT)"
+        },
+        {
+          "name": "keyword.other.basic",
+          "match": "(?i)(?<![A-Za-z])USING(?![A-Za-z0-9$%])"
+        },
+        {
+          "name": "support.function.basic",
+          "match": "(?i)(?:(?<![A-Za-z])|(?<=IF|OR|TO|AND|NOT|THEN|ELSE|STEP|PRINT))(?:LEFT\\$|RIGHT\\$|MID\\$|CHR\\$|STR\\$|SPACE\\$|STRING\\$|INSTR|SIN|COS|TAN|ATN|EXP|ABS|LOG|SQR|INT|FIX|SGN|RND|VAL|LEN|ASC|TAB|SPC)(?:(?=[ \\t]*\\()|(?![A-Za-z0-9$%(]))"
+        },
+        {
+          "name": "entity.name.function.basic",
+          "match": "(?i)(?:(?<![A-Za-z])|(?<=DEF))FN[A-Za-z][A-Za-z0-9]*[$%]?"
+        },
+        {
+          "name": "constant.numeric.basic",
+          "match": "(?i)(?<![A-Za-z0-9.])(?:\\d+\\.?\\d*|\\.\\d+)(?:E[-+]?\\d+)?"
+        },
+        {
+          "name": "variable.other.string.basic",
+          "match": "(?i)[A-Za-z](?:(?!THEN(?:[ \\t]*\\d|[ \\t]*(?:PRINT|INPUT|GOTO|GOSUB|GO[ \\t]*TO|LET|IF|FOR|NEXT|READ|RETURN|END|STOP|DIM|ON))|GOTO|GOSUB)[A-Za-z0-9])*\\$"
+        },
+        {
+          "name": "variable.other.basic",
+          "match": "(?i)[A-Za-z](?:(?!THEN(?:[ \\t]*\\d|[ \\t]*(?:PRINT|INPUT|GOTO|GOSUB|GO[ \\t]*TO|LET|IF|FOR|NEXT|READ|RETURN|END|STOP|DIM|ON))|GOTO|GOSUB)[A-Za-z0-9])*%?"
+        },
+        {
+          "include": "#operators"
+        }
+      ]
+    },
+    "operators": {
+      "patterns": [
+        {
+          "name": "keyword.operator.comparison.basic",
+          "match": "<>|<=|>=|=<|=>|[<>]"
+        },
+        {
+          "name": "keyword.operator.assignment.basic",
+          "match": "="
+        },
+        {
+          "name": "keyword.operator.arithmetic.basic",
+          "match": "[-+*/^↑]"
+        },
+        {
+          "name": "punctuation.separator.basic",
+          "match": "[,;]"
+        },
+        {
+          "name": "punctuation.terminator.statement.basic",
+          "match": ":"
+        }
+      ]
+    }
+  }
+}

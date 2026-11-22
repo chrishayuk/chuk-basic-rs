@@ -44,3 +44,9 @@ jobs:
           cargo build --release
           web/build.sh
           node web/test.mjs
+
+      - name: VS Code extension (the grammar, tokenised in node)
+        working-directory: editors/vscode
+        run: |
+          npm ci
+          npm test
