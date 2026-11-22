@@ -1,3 +1,5 @@
 node_modules/
 *.vsix
 .vscode-test/
+# built by `npm run build`, from the Rust source
+server/chuk-basic.wasm

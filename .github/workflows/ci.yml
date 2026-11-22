@@ -45,8 +45,9 @@ jobs:
           web/build.sh
           node web/test.mjs
 
-      - name: VS Code extension (the grammar, tokenised in node)
+      - name: VS Code extension (the grammar, and the interpreter and language server it carries, in node)
         working-directory: editors/vscode
         run: |
           npm ci
+          npm run build
           npm test

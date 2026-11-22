@@ -4,9 +4,12 @@
 
 - Syntax highlighting for line-numbered BASIC (`.bas`), including listings
   typed without spaces.
+- Nothing else to install: the interpreter and language server are carried
+  as WebAssembly. `chukBasic.path` uses a `chuk-basic` program instead.
 - Language server (`chuk-basic --lsp`): errors as you type, go to a line
   from `GOTO`/`GOSUB`/`THEN`, find the lines that jump to a line, hover help,
   an outline of functions and subroutines.
+- Run Program runs in a terminal of its own, where `INPUT` is typed.
 - Commands: Run Program, Renumber Lines, Switch Dialect, Restart Language
   Server.
 - A 1964 Dartmouth setting, which warns about what the first manual's BASIC

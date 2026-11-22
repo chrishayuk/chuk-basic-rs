@@ -28,12 +28,48 @@ library.
 - **New to BASIC?** Start with the [tutorial](tutorial/01-introduction.md): 22
   chapters, and every program in them is run and checked.
 - **Want something to run?** There are [150 sample programs](samples/README.md).
-- **No terminal handy?** The [browser playground](web/README.md) runs the same
-  interpreter in a web page.
+- **No terminal handy?** The [playground](https://chrishayuk.com/demos/basic)
+  runs the same interpreter in a web page ([how it works](web/README.md)).
 - **Writing BASIC?** There is a [VS Code extension](editors/vscode/README.md)
-  with highlighting and a language server.
+  with highlighting and a language server; see [Install](#install).
 
-## Quick start
+## Install
+
+You need [Rust](https://rustup.rs). One command installs the interpreter,
+the compiler and the language server, which are all the one program:
+
+```bash
+cargo install --git https://github.com/chrishayuk/chuk-basic-rs chuk-basic
+```
+
+That puts `chuk-basic` in `~/.cargo/bin`. Then:
+
+```bash
+echo '10 PRINT "HELLO, WORLD!"' > hello.bas
+chuk-basic hello.bas
+```
+
+For Visual Studio Code, download `chuk-basic-0.1.0.vsix` from the
+[latest release](https://github.com/chrishayuk/chuk-basic-rs/releases/latest)
+and install it:
+
+```bash
+code --install-extension chuk-basic-0.1.0.vsix
+```
+
+Open any `.bas` file and you get highlighting, problems as you type, hover
+help, go to a `GOTO`'s line, renumbering and a run button. The extension
+carries its own copy of the interpreter and language server, so it works
+without the `cargo install` above. To build it yourself, and for Neovim,
+Helix and other editors, see [`editors/README.md`](editors/README.md).
+
+Or try BASIC with nothing installed, in the
+[playground](https://chrishayuk.com/demos/basic), beside the pages of the
+1964 manual.
+
+## Build and run
+
+To work on the interpreter itself, clone the repository and:
 
 ```bash
 cargo build --release
@@ -42,8 +78,6 @@ target/release/chuk-basic samples/classic/mandelbrot.bas
 target/release/chuk-basic samples/games/hammurabi.bas
 target/release/chuk-basic samples/games/superstartrek.bas
 ```
-
-Or install it as `chuk-basic` with `cargo install --path .`.
 
 ```text
 Usage: chuk-basic [OPTIONS] [FILE.bas]

@@ -14,7 +14,11 @@ the 1970s that the type-in games were written for. Part of
 
 ## What it does
 
-**Highlighting**, with no other program needed:
+Nothing else has to be installed. The extension carries the interpreter,
+which is also the language server, compiled to WebAssembly, and runs it
+with the Node that VS Code is built on.
+
+**Highlighting:**
 
 - line numbers, and the line numbers that `GOTO`, `GOSUB`, `THEN`, `ELSE`,
   `RESTORE` and `ON ... GOTO` point at, coloured alike so a jump and its
@@ -25,7 +29,7 @@ the 1970s that the type-in games were written for. Part of
 - listings typed without spaces, as most of the 1978 games were:
   `FORI=1TO10:PRINTI:NEXTI`.
 
-**With the `chuk-basic` program installed**, a language server adds:
+**The language server** adds:
 
 - **errors as you type**: syntax errors, a `GOTO` to a line that is not
   there, two lines with the same number;
@@ -35,7 +39,9 @@ the 1970s that the type-in games were written for. Part of
 - **an outline** of the functions a program defines and the subroutines it
   calls;
 - **Renumber Lines**: renumber in tens and fix every reference;
-- **Run Program** (F5, or the ▷ button): run the file in a terminal.
+- **Run Program** (F5, or the ▷ button): run the file in a terminal of its
+  own, where a program's `INPUT` is typed and Ctrl+C stops one that never
+  ends.
 
 **A 1964 setting.** Set `chukBasic.dialect` to `dartmouth`, or click
 `BASIC: later` in the status bar, and the editor warns about anything the
@@ -45,41 +51,54 @@ Program uses 1964's arithmetic and printing (`--dialect dartmouth`).
 
 ## Install
 
-The extension is not on the Marketplace. Build the `.vsix` and install it:
+Download `chuk-basic-0.1.0.vsix` from the
+[releases page](https://github.com/chrishayuk/chuk-basic-rs/releases), then:
 
 ```bash
-cd editors/vscode
-npm install
-npx @vscode/vsce package          # writes chuk-basic-0.1.0.vsix
 code --install-extension chuk-basic-0.1.0.vsix
 ```
 
-For everything beyond highlighting, install the interpreter, which is also
-the language server:
+Or, in VS Code: Extensions, the `...` menu, Install from VSIX. Open any
+`.bas` file and it is working. The extension is not on the Marketplace.
+
+To build it yourself you need [Node](https://nodejs.org) and
+[Rust](https://rustup.rs) with the WebAssembly target:
 
 ```bash
-cargo install --path .            # in the chuk-basic-rs repository; installs chuk-basic
-chuk-basic --help                 # should list --lsp
+rustup target add wasm32-wasip1
+git clone https://github.com/chrishayuk/chuk-basic-rs
+cd chuk-basic-rs/editors/vscode
+npm install
+npm run package                   # builds server/chuk-basic.wasm and chuk-basic-0.1.0.vsix
+code --install-extension chuk-basic-0.1.0.vsix
 ```
 
-If `chuk-basic` is not on your `PATH`, set `chukBasic.path` to where it is.
-Without it you get a single message saying so, and highlighting carries on.
+### Which interpreter it uses
+
+The one it carries, unless `chukBasic.path` is set. A `chuk-basic` on your
+`PATH` is not picked up by itself: the extension behaves the same on every
+machine until you say otherwise. Set `chukBasic.path` to `chuk-basic`, or to
+a full path, to use a program you built (`cargo install --git
+https://github.com/chrishayuk/chuk-basic-rs chuk-basic`); it is then used
+both as the language server and to run programs. The native program is
+faster on long-running programs; for the editor's own work there is no
+difference you would notice.
 
 ## Settings
 
 | Setting | Default | |
 | --- | --- | --- |
-| `chukBasic.path` | `chuk-basic` | The program: a name on `PATH` or a full path. Started as `chuk-basic --lsp`. |
+| `chukBasic.path` | empty | A `chuk-basic` program to use instead of the built-in one: a name on `PATH` or a full path. |
 | `chukBasic.dialect` | `later` | `later` for the BASICs of the 1970s and after; `dartmouth` for BASIC as the 1964 manual describes it. |
 
 ## Commands
 
 | Command | |
 | --- | --- |
-| BASIC: Run Program | Saves the file and runs it in a terminal called BASIC. F5. |
+| BASIC: Run Program | Saves the file and runs it in a terminal of its own. F5. |
 | BASIC: Renumber Lines | Renumbers in tens and rewrites every `GOTO`, `GOSUB`, `THEN` and `RESTORE`. |
 | BASIC: Switch Dialect | Between `later` and `dartmouth`. Also the status-bar item. |
-| BASIC: Restart Language Server | After installing or rebuilding `chuk-basic`. |
+| BASIC: Restart Language Server | After rebuilding a `chuk-basic` of your own. |
 
 ## `.bas` files and Visual Basic
 
@@ -127,13 +146,21 @@ Syntax errors are not marked by the grammar; the language server does that.
 
 ```bash
 npm install
-npm run grammar       # scripts/build-grammar.js writes syntaxes/basic.tmLanguage.json
-npm test              # grammar tests, in node, no VS Code needed
+npm run build         # the grammar, and server/chuk-basic.wasm from the Rust source
+npm test              # grammar, built-in interpreter and language server, in node
 npm run test:vscode   # opens a real VS Code with its own empty profile and checks the lot
+npm run package       # build, then chuk-basic-0.1.0.vsix
 ```
 
 The grammar is generated: edit `scripts/build-grammar.js`, not the JSON.
-`test:vscode` uses the VS Code installed on the machine if there is one, and
-the `chuk-basic` in `target/release`; `CHUK_BASIC=none` runs it without a
-server. Press F5 in VS Code with this folder open to try the extension in a
+`server/chuk-basic.wasm` is built, not committed: `npm run build` compiles
+the repository's Rust for `wasm32-wasip1` with the `editor` feature and
+copies it in. `server/wasi.js` is the small WASI host that runs it; it gives
+the program one file to read (the BASIC program), standard input, and
+standard output.
+
+`test:vscode` uses the VS Code installed on the machine if there is one. By
+default it tests what a user gets, the built-in server with no `chuk-basic`
+reachable; `CHUK_BASIC=native` tests `target/release/chuk-basic` instead.
+Press F5 in VS Code with this folder open to try the extension in a
 development window.

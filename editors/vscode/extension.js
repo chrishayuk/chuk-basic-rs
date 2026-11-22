@@ -1,16 +1,23 @@
 // BASIC for VS Code.
 //
 // Highlighting needs nothing but the grammar in syntaxes/. Everything else -
-// errors as you type, line numbers as links, hover, renumbering - comes from
-// the language server, which is the interpreter itself: `chuk-basic --lsp`,
-// speaking the Language Server Protocol on standard input and output.
+// errors as you type, line numbers as links, hover, renumbering, running a
+// program - comes from the interpreter, which is also the language server
+// (`chuk-basic --lsp`, speaking the Language Server Protocol on standard
+// input and output).
+//
+// The extension carries the interpreter compiled to WebAssembly, in server/,
+// and runs it with the Node that VS Code is built on, so nothing else has to
+// be installed. Setting `chukBasic.path` uses a chuk-basic program instead.
 
+const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const vscode = require("vscode");
-const { LanguageClient, State } = require("vscode-languageclient/node");
+const { LanguageClient, State, TransportKind } = require("vscode-languageclient/node");
 
 const LANGUAGE = "basic";
-const INSTALL = "https://github.com/chrishayuk/chuk-basic-rs#quick-start";
+const INSTALL = "https://github.com/chrishayuk/chuk-basic-rs#install";
 const RENUMBER = "chukBasic.server.renumber";
 const START_TIMEOUT = 10000;
 
@@ -19,9 +26,13 @@ let client;
 /** @type {vscode.StatusBarItem | undefined} */
 let status;
 let warned = false;
+/** @type {vscode.ExtensionContext} */
+let extension;
 
 const settings = () => vscode.workspace.getConfiguration("chukBasic");
-const program = () => settings().get("path", "chuk-basic") || "chuk-basic";
+/** The chuk-basic program the user asked for, or "" for the one carried here. */
+const program = () => (settings().get("path", "") || "").trim();
+const carried = (file) => extension.asAbsolutePath(path.join("server", file));
 /** "later" or "dartmouth" */
 const dialect = () => (settings().get("dialect") === "dartmouth" ? "dartmouth" : "later");
 
@@ -42,9 +53,10 @@ async function serverMissing(reason) {
   warned = true;
   const install = "How to install";
   const choose = "Set the path";
+  const which = program() ? `\`${program()} --lsp\`, from the chukBasic.path setting` : "the one built into the extension";
   const choice = await vscode.window.showWarningMessage(
-    `BASIC: could not start the language server (\`${program()} --lsp\`): ${reason}. ` +
-      "Highlighting still works; errors as you type, links between lines and renumbering need the chuk-basic program.",
+    `BASIC: could not start the language server (${which}): ${reason}. ` +
+      "Highlighting still works. Clear chukBasic.path to use the built-in server.",
     install,
     choose,
   );
@@ -53,9 +65,12 @@ async function serverMissing(reason) {
 }
 
 async function startServer() {
-  // No `transport` here: naming stdio makes the client add a `--stdio`
-  // argument of its own. Standard input and output are the default.
-  const server = { command: program(), args: ["--lsp"] };
+  // The built-in server is a Node module, started by the client with VS Code's
+  // own Node; it adds a `--stdio` argument, which server/lsp.js ignores. For a
+  // chuk-basic program no transport is named: standard input and output are
+  // the default, and naming them would add that argument to its command line.
+  const builtIn = { module: carried("lsp.js"), transport: TransportKind.stdio };
+  const server = program() ? { command: program(), args: ["--lsp"] } : { run: builtIn, debug: builtIn };
   const next = new LanguageClient("chukBasic", "BASIC", server, {
     documentSelector: [
       { language: LANGUAGE, scheme: "file" },
@@ -112,22 +127,43 @@ async function activeProgram() {
   return editor.document;
 }
 
-const quote = (text) => (/^[A-Za-z0-9_\/.:=+-]+$/.test(text) ? text : `"${text.replace(/(["\\$`])/g, "\\$1")}"`);
-
 async function run() {
   const document = await activeProgram();
   if (!document) return;
-  if (document.isUntitled) {
-    vscode.window.showInformationMessage("BASIC: save the program to a file before running it.");
+  let file = document.uri.fsPath;
+  if (document.isUntitled || document.uri.scheme !== "file") {
+    // not on disk yet: run a copy
+    file = path.join(os.tmpdir(), "untitled.bas");
+    fs.writeFileSync(file, document.getText());
+  } else if (document.isDirty && !(await document.save())) {
     return;
   }
-  if (document.isDirty && !(await document.save())) return;
-  const terminal =
-    vscode.window.terminals.find((candidate) => candidate.name === "BASIC" && candidate.exitStatus === undefined) ||
-    vscode.window.createTerminal({ name: "BASIC", cwd: path.dirname(document.uri.fsPath) });
-  terminal.show(true);
-  const words = [program(), ...(dialect() === "dartmouth" ? ["--dialect", "dartmouth"] : []), document.uri.fsPath];
-  terminal.sendText(words.map(quote).join(" "));
+  const options = dialect() === "dartmouth" ? ["--dialect", "dartmouth"] : [];
+  const cwd = path.dirname(file);
+  // A task, not text sent to a shell: it gets a terminal of its own, where
+  // INPUT is typed and Ctrl+C stops a program that never ends.
+  const execution = program()
+    ? new vscode.ProcessExecution(program(), [...options, file], { cwd })
+    : new vscode.ProcessExecution(process.execPath, [carried("run.js"), ...options, file], {
+        cwd,
+        env: { ELECTRON_RUN_AS_NODE: "1" },
+      });
+  const task = new vscode.Task(
+    { type: "chuk-basic" },
+    vscode.TaskScope.Workspace,
+    `Run ${path.basename(file)}`,
+    "BASIC",
+    execution,
+    [],
+  );
+  task.presentationOptions = {
+    reveal: vscode.TaskRevealKind.Always,
+    panel: vscode.TaskPanelKind.Dedicated,
+    focus: true,
+    clear: true,
+    showReuseMessage: false,
+  };
+  return vscode.tasks.executeTask(task);
 }
 
 async function renumber() {
@@ -152,6 +188,7 @@ async function switchDialect() {
 }
 
 async function activate(context) {
+  extension = context;
   status = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 90);
   status.command = "chukBasic.switchDialect";
   context.subscriptions.push(

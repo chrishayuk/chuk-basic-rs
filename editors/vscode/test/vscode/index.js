@@ -2,7 +2,6 @@
 // failure fails the run.
 
 const assert = require("node:assert/strict");
-const { execFileSync } = require("node:child_process");
 const path = require("node:path");
 const vscode = require("vscode");
 
@@ -21,15 +20,8 @@ async function until(what, probe, timeout = 15000) {
   }
 }
 
-/** Does this chuk-basic have the language server? */
-function serverSpeaksLsp() {
-  if (!server) return false;
-  try {
-    return execFileSync(server, ["--help"], { encoding: "utf8" }).includes("--lsp");
-  } catch {
-    return false;
-  }
-}
+/** Which server this run is about, for the report. */
+const which = server ? `native ${path.basename(server)}` : "built-in WebAssembly";
 
 /** The grammar's scopes for a document, from VS Code's own tokeniser. */
 async function scopesOf(uri) {
@@ -80,7 +72,6 @@ check("the grammar colours the manual's program 2", async () => {
 });
 
 check("the language server: errors, hover, definition, references, symbols", async () => {
-  if (!serverSpeaksLsp()) return "NOT RUN: no chuk-basic with --lsp was found";
   const api = vscode.extensions.getExtension("chrishayuk.chuk-basic").exports;
   await until("the server to start", () => api.client() && api.client().state === 2 /* Running */);
 
@@ -98,7 +89,7 @@ check("the language server: errors, hover, definition, references, symbols", asy
     diagnostics.some((diagnostic) => diagnostic.range.start.line === 1),
     `a diagnostic on the GOTO line; got ${JSON.stringify(diagnostics.map((d) => [d.range.start.line, d.message]))}`,
   );
-  const report = [`diagnostic: "${diagnostics[0].message}"`];
+  const report = [which, `diagnostic: "${diagnostics[0].message}"`];
 
   const uri = sample("dartmouth/example2.bas");
   const document = await vscode.workspace.openTextDocument(uri);
@@ -152,7 +143,6 @@ check("the language server: errors, hover, definition, references, symbols", asy
 });
 
 check("renumbering rewrites the lines and what points at them", async () => {
-  if (!serverSpeaksLsp()) return "NOT RUN: no chuk-basic with --lsp was found";
   const document = await vscode.workspace.openTextDocument({
     language: "basic",
     content: '5 PRINT "A"\n6 GOTO 9\n9 END\n',
@@ -171,23 +161,43 @@ check("switching the dialect changes the setting and the 1964 warnings", async (
   await vscode.commands.executeCommand("chukBasic.switchDialect");
   await until("the setting", () => vscode.workspace.getConfiguration("chukBasic").get("dialect") === "dartmouth");
   let report = "later -> dartmouth";
-  if (serverSpeaksLsp()) {
-    const document = await vscode.workspace.openTextDocument({
-      language: "basic",
-      content: '10 INPUT N$\n20 PRINT N$\n30 END\n',
-    });
-    await vscode.window.showTextDocument(document);
-    const found = await until("a 1964 warning", () => {
-      const list = vscode.languages.getDiagnostics(document.uri);
-      return list.length > 0 && list;
-    });
-    report += `; 1964 warning: "${found[0].message}"`;
-  } else {
-    report += "; warnings NOT RUN (no server)";
-  }
+  const document = await vscode.workspace.openTextDocument({
+    language: "basic",
+    content: '10 INPUT N$\n20 PRINT N$\n30 END\n',
+  });
+  await vscode.window.showTextDocument(document);
+  const found = await until("a 1964 warning", () => {
+    const list = vscode.languages.getDiagnostics(document.uri);
+    return list.length > 0 && list;
+  });
+  report += `; 1964 warning: "${found[0].message}"`;
   await vscode.commands.executeCommand("chukBasic.switchDialect");
   await until("the setting", () => vscode.workspace.getConfiguration("chukBasic").get("dialect") === "later");
   return report;
+});
+
+check("Run Program runs the file in a terminal, and reports how it ended", async () => {
+  // what a task's process exits with is the one thing a test can see of a terminal
+  const ending = (name) =>
+    new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error(`${name} did not finish`)), 30000);
+      const listener = vscode.tasks.onDidEndTaskProcess((event) => {
+        if (event.execution.task.name !== `Run ${name}`) return;
+        clearTimeout(timer);
+        listener.dispose();
+        resolve(event.exitCode);
+      });
+    });
+  const runIt = async (name) => {
+    await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(sample(`dartmouth/${name}`)));
+    const ended = ending(name);
+    await vscode.commands.executeCommand("chukBasic.run");
+    return ended;
+  };
+  // program 1 ends normally; program 2, as a later BASIC, stops at line 40
+  assert.equal(await runIt("example1.bas"), 0);
+  assert.equal(await runIt("example2.bas"), 1);
+  return `${which}: example1.bas exit 0; example2.bas, as a later BASIC, exit 1`;
 });
 
 exports.run = async function run() {

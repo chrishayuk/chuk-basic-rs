@@ -1,46 +1,79 @@
 {
   "name": "chuk-basic",
   "displayName": "BASIC (Dartmouth 1964 and classic)",
-  "description": "Line-numbered BASIC: syntax highlighting, and a language server with errors as you type, line numbers as links, renumbering and a 1964 Dartmouth mode.",
+  "description": "Line-numbered BASIC with nothing else to install: syntax highlighting, errors as you type, line numbers as links, renumbering, a run button and a 1964 Dartmouth mode.",
   "version": "0.1.0",
   "publisher": "chrishayuk",
   "license": "MIT",
-  "repository": { "type": "git", "url": "https://github.com/chrishayuk/chuk-basic-rs" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chrishayuk/chuk-basic-rs"
+  },
   "homepage": "https://github.com/chrishayuk/chuk-basic-rs/tree/main/editors/vscode",
-  "bugs": { "url": "https://github.com/chrishayuk/chuk-basic-rs/issues" },
-  "engines": { "vscode": "^1.82.0" },
-  "categories": ["Programming Languages", "Linters"],
-  "keywords": ["basic", "dartmouth", "retro", "gw-basic", "line numbers"],
+  "bugs": {
+    "url": "https://github.com/chrishayuk/chuk-basic-rs/issues"
+  },
+  "engines": {
+    "vscode": "^1.82.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters"
+  ],
+  "keywords": [
+    "basic",
+    "dartmouth",
+    "retro",
+    "gw-basic",
+    "line numbers"
+  ],
   "main": "./extension.js",
   "activationEvents": [],
   "contributes": {
     "languages": [
       {
         "id": "basic",
-        "aliases": ["BASIC", "Dartmouth BASIC", "basic"],
-        "extensions": [".bas"],
+        "aliases": [
+          "BASIC",
+          "Dartmouth BASIC",
+          "basic"
+        ],
+        "extensions": [
+          ".bas"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
     "grammars": [
-      { "language": "basic", "scopeName": "source.basic", "path": "./syntaxes/basic.tmLanguage.json" }
+      {
+        "language": "basic",
+        "scopeName": "source.basic",
+        "path": "./syntaxes/basic.tmLanguage.json"
+      }
     ],
     "configurationDefaults": {
-      "files.associations": { "*.bas": "basic" },
-      "[basic]": { "editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?" }
+      "files.associations": {
+        "*.bas": "basic"
+      },
+      "[basic]": {
+        "editor.wordSeparators": "`~!@#%^&*()-=+[{]}\\|;:'\",.<>/?"
+      }
     },
     "configuration": {
       "title": "BASIC",
       "properties": {
         "chukBasic.path": {
           "type": "string",
-          "default": "chuk-basic",
+          "default": "",
           "scope": "machine-overridable",
-          "markdownDescription": "The `chuk-basic` program: a name found on `PATH`, or a full path. It runs programs and, as `chuk-basic --lsp`, is the language server."
+          "markdownDescription": "A `chuk-basic` program to use instead of the one built into the extension: a name found on `PATH`, or a full path. It runs programs and, as `chuk-basic --lsp`, is the language server. Leave empty to use the built-in one."
         },
         "chukBasic.dialect": {
           "type": "string",
-          "enum": ["later", "dartmouth"],
+          "enum": [
+            "later",
+            "dartmouth"
+          ],
           "enumDescriptions": [
             "The BASICs of the 1970s and after (Microsoft, GW-BASIC).",
             "Dartmouth BASIC as its May 1964 manual describes it: warnings for what 1964 did not have, and 1964 arithmetic and printing when a program is run."
@@ -51,27 +84,66 @@
       }
     },
     "commands": [
-      { "command": "chukBasic.run", "title": "Run Program", "category": "BASIC", "icon": "$(play)" },
-      { "command": "chukBasic.renumber", "title": "Renumber Lines", "category": "BASIC" },
-      { "command": "chukBasic.switchDialect", "title": "Switch Dialect (1964 Dartmouth / Later)", "category": "BASIC" },
-      { "command": "chukBasic.restartServer", "title": "Restart Language Server", "category": "BASIC" }
+      {
+        "command": "chukBasic.run",
+        "title": "Run Program",
+        "category": "BASIC",
+        "icon": "$(play)"
+      },
+      {
+        "command": "chukBasic.renumber",
+        "title": "Renumber Lines",
+        "category": "BASIC"
+      },
+      {
+        "command": "chukBasic.switchDialect",
+        "title": "Switch Dialect (1964 Dartmouth / Later)",
+        "category": "BASIC"
+      },
+      {
+        "command": "chukBasic.restartServer",
+        "title": "Restart Language Server",
+        "category": "BASIC"
+      }
     ],
     "menus": {
-      "editor/title/run": [{ "command": "chukBasic.run", "when": "editorLangId == basic", "group": "navigation" }],
+      "editor/title/run": [
+        {
+          "command": "chukBasic.run",
+          "when": "editorLangId == basic",
+          "group": "navigation"
+        }
+      ],
       "commandPalette": [
-        { "command": "chukBasic.run", "when": "editorLangId == basic" },
-        { "command": "chukBasic.renumber", "when": "editorLangId == basic" }
+        {
+          "command": "chukBasic.run",
+          "when": "editorLangId == basic"
+        },
+        {
+          "command": "chukBasic.renumber",
+          "when": "editorLangId == basic"
+        }
       ]
     },
     "keybindings": [
-      { "command": "chukBasic.run", "key": "f5", "when": "editorTextFocus && editorLangId == basic && !inDebugMode" }
+      {
+        "command": "chukBasic.run",
+        "key": "f5",
+        "when": "editorTextFocus && editorLangId == basic && !inDebugMode"
+      }
+    ],
+    "taskDefinitions": [
+      {
+        "type": "chuk-basic"
+      }
     ]
   },
   "scripts": {
     "grammar": "node scripts/build-grammar.js",
-    "test": "node scripts/build-grammar.js --check && node --test test/grammar.test.js",
+    "build": "node build.js",
+    "test": "node scripts/build-grammar.js --check && node --test test/grammar.test.js test/server.test.js",
     "test:vscode": "node test/run-vscode.js",
-    "package": "vsce package"
+    "package": "node build.js && vsce package"
   },
   "dependencies": {
     "vscode-languageclient": "^9.0.1"

@@ -1,8 +1,12 @@
 // Runs test/vscode/index.js inside a real VS Code, with this folder loaded as
 // the extension under development.
 //
-//   npm run test:vscode
-//   CHUK_BASIC=none npm run test:vscode     without the language server
+//   npm run test:vscode                       the server the extension carries
+//   CHUK_BASIC=native npm run test:vscode     target/release/chuk-basic instead
+//   CHUK_BASIC=/path/to/chuk-basic npm run test:vscode
+//
+// The first is what someone who installs the extension gets: no chuk-basic
+// program anywhere, the WebAssembly build in server/ (`npm run build`).
 //
 // It uses the VS Code installed on this machine if there is one (set
 // VSCODE_EXECUTABLE to choose), and downloads one otherwise. The instance has
@@ -26,19 +30,18 @@ const installed = [
 
 async function main() {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), "chuk-basic-vscode-"));
-  // CHUK_BASIC=none runs the checks with no server, as on a machine without chuk-basic
-  const server =
-    process.env.CHUK_BASIC === "none"
-      ? undefined
-      : [process.env.CHUK_BASIC, path.join(repo, "target", "release", "chuk-basic")].find(
-          (candidate) => candidate && fs.existsSync(candidate),
-        );
+  const asked = process.env.CHUK_BASIC || "";
+  const server = asked === "native" ? path.join(repo, "target", "release", "chuk-basic") : asked === "none" ? "" : asked;
+  if (server && !fs.existsSync(server)) throw new Error(`${server} does not exist`);
+  if (!server && !fs.existsSync(path.join(extension, "server", "chuk-basic.wasm"))) {
+    throw new Error("server/chuk-basic.wasm is not built: run `npm run build`");
+  }
   fs.mkdirSync(path.join(profile, "User"), { recursive: true });
   fs.writeFileSync(
     path.join(profile, "User", "settings.json"),
     JSON.stringify({
-      // a path that does not exist exercises "highlighting still works without the server"
-      "chukBasic.path": server || path.join(profile, "no-such-chuk-basic"),
+      // empty: the server and interpreter the extension carries
+      "chukBasic.path": server,
       "security.workspace.trust.enabled": false,
       "telemetry.telemetryLevel": "off",
       "update.mode": "none",
@@ -49,7 +52,12 @@ async function main() {
       ...(installed ? { vscodeExecutablePath: installed } : {}),
       extensionDevelopmentPath: extension,
       extensionTestsPath: path.join(__dirname, "vscode", "index.js"),
-      extensionTestsEnv: { CHUK_BASIC_REPO: repo, CHUK_BASIC_SERVER: server || "" },
+      // no chuk-basic can be found by name either: the built-in run must not lean on one
+      extensionTestsEnv: {
+        CHUK_BASIC_REPO: repo,
+        CHUK_BASIC_SERVER: server,
+        PATH: server ? process.env.PATH : "/usr/bin:/bin",
+      },
       launchArgs: [
         path.join(repo, "samples", "dartmouth"),
         `--user-data-dir=${profile}`,
