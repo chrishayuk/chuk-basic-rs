@@ -308,7 +308,7 @@ too, and the tests compare ours with the page.
 
 Example 2 takes the square root of a negative number on line 40 and relies
 on a rule the manual states on page 5: "the square-root is always taken of
-the absolute value". Every later BASIC treats that as an error, and so does
+the absolute value". The later BASICs tried here (GW-BASIC, as PC-BASIC emulates it) treat that as an error, and so does
 chuk-basic unless asked otherwise:
 
 ```bash

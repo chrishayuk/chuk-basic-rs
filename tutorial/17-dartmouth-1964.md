@@ -168,7 +168,7 @@ its sign. For the third equation `D` is -8.
 The manual explains on page 5. Of `SQR` it says "the square-root is always
 taken of the absolute value", and of powers that `A ↑ B` "is actually
 interpreted as |A|^B". In 1964 the square root of -8 was the square root of
-8, and the program relies on it. Every later BASIC treats the square root of
+8, and the program relies on it. GW-BASIC, like most BASICs that came after, treats the square root of
 a negative number as an error, and so does this one unless asked otherwise:
 
 ```bash
