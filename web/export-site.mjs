@@ -34,8 +34,7 @@ const examples = index.map(({ file, ...rest }) => {
   return {
     name: file.replace(/\.bas$/, ""),
     ...rest,
-    // the 1978 listings have Windows line endings
-    program: readFileSync(join(here, "examples", file), "utf8").replace(/\r\n/g, "\n"),
+    program: readFileSync(join(here, "examples", file), "utf8"),
   };
 });
 writeFileSync(join(to, "examples.json"), JSON.stringify(examples));

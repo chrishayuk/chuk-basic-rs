@@ -1,30 +1,29 @@
 [
   {
     "file": "preface.bas",
+    "group": "The 1964 manual",
     "title": "1964: the preface's program",
-    "input": false,
-    "from": "samples/dartmouth",
     "scan": "p01-preface.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 1",
     "prints": "5",
     "details": [
       "detail-preface-program.jpg"
-    ]
+    ],
+    "input": false
   },
   {
     "file": "example1.bas",
+    "group": "The 1964 manual",
     "title": "1964: example 1, average of 100 logs",
-    "input": false,
-    "from": "samples/dartmouth",
     "scan": "p21-examples.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 21",
-    "prints": "1.5797"
+    "prints": "1.5797",
+    "input": false
   },
   {
     "file": "example2.bas",
+    "group": "The 1964 manual",
     "title": "1964: example 2, quadratic equation",
-    "input": false,
-    "from": "samples/dartmouth",
     "dialect": "dartmouth",
     "scan": "p22-results.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, pp. 21-22",
@@ -33,65 +32,947 @@
       "detail-program-2-line-40.jpg",
       "detail-sqr-absolute-value.jpg",
       "detail-program-2-result.jpg"
-    ]
+    ],
+    "input": false
   },
   {
     "file": "example3.bas",
+    "group": "The 1964 manual",
     "title": "1964: example 3, root of a function",
-    "input": false,
-    "from": "samples/dartmouth",
     "scan": "p23-example-3.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 23",
-    "prints": "ROOT = .837585"
+    "prints": "ROOT = .837585",
+    "input": false
   },
   {
     "file": "hello.bas",
+    "group": "Start here",
     "title": "Hello, world",
     "input": false
   },
   {
     "file": "primes.bas",
+    "group": "Start here",
     "title": "Primes",
     "input": false
   },
   {
     "file": "mandelbrot.bas",
+    "group": "Start here",
     "title": "Mandelbrot set",
     "input": false
   },
   {
     "file": "guess.bas",
+    "group": "Start here",
     "title": "Guess the number",
     "input": true
   },
   {
     "file": "hi-lo.bas",
+    "group": "Start here",
     "title": "Hi-Lo (game)",
-    "input": true,
-    "credit": "BASIC Computer Games, 1978"
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
   },
   {
     "file": "hammurabi.bas",
+    "group": "Start here",
     "title": "Hammurabi (game)",
-    "input": true,
-    "credit": "BASIC Computer Games, 1978"
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
   },
   {
     "file": "lunar.bas",
+    "group": "Start here",
     "title": "Lunar Lander (game)",
-    "input": true,
-    "credit": "BASIC Computer Games, 1978"
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
   },
   {
     "file": "superstartrek.bas",
+    "group": "Start here",
     "title": "Super Star Trek (game)",
-    "input": true,
-    "credit": "BASIC Computer Games, 1978"
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
   },
   {
     "file": "diamond.bas",
+    "group": "Start here",
     "title": "Diamond (pattern)",
-    "input": true,
-    "credit": "BASIC Computer Games, 1978"
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "tutorial/01_hello.bas",
+    "title": "1. Hello",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/02_print.bas",
+    "title": "2. Print",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/03_variables.bas",
+    "title": "3. Variables",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/04_input.bas",
+    "title": "4. Input",
+    "group": "Tutorial",
+    "input": true
+  },
+  {
+    "file": "tutorial/05_decisions.bas",
+    "title": "5. Decisions",
+    "group": "Tutorial",
+    "input": true
+  },
+  {
+    "file": "tutorial/06_loops.bas",
+    "title": "6. Loops",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/07_subroutines.bas",
+    "title": "7. Subroutines",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/08_arrays.bas",
+    "title": "8. Arrays",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/09_data.bas",
+    "title": "9. Data",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/10_strings.bas",
+    "title": "10. Strings",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/11_functions.bas",
+    "title": "11. Functions",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/12_random.bas",
+    "title": "12. Random",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "tutorial/13_game.bas",
+    "title": "13. Game",
+    "group": "Tutorial",
+    "input": true
+  },
+  {
+    "file": "tutorial/14_errors.bas",
+    "title": "14. Errors",
+    "group": "Tutorial",
+    "input": false
+  },
+  {
+    "file": "classic/average.bas",
+    "title": "Read numbers from the keyboard until a blank line or zero",
+    "group": "Classics",
+    "input": true
+  },
+  {
+    "file": "classic/binary.bas",
+    "title": "Decimal to binary and hexadecimal",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/bottles.bas",
+    "title": "Bottles of beer, counting down from five",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/bubblesort.bas",
+    "title": "Bubble sort of numbers held in DATA",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/collatz.bas",
+    "title": "Collatz sequences: halve if even, triple and add one if odd",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/factorial.bas",
+    "title": "Factorials, with a loop and with a recursive function",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/fibonacci.bas",
+    "title": "The first 20 Fibonacci numbers",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/gcd.bas",
+    "title": "Greatest common divisor by Euclid's algorithm",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/hanoi.bas",
+    "title": "Towers of Hanoi for 3 discs, using an explicit stack",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/life.bas",
+    "title": "Conway's Game of Life: a glider crossing an 8 x 8 board",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/matrix.bas",
+    "title": "Multiply two matrices held in two-dimensional arrays",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/pi.bas",
+    "title": "Three ways to approximate pi",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/roman.bas",
+    "title": "Roman numerals",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/strings.bas",
+    "title": "String handling: reversing, palindromes and a Caesar cipher",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/temperature.bas",
+    "title": "A conversion table built with user-defined functions",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/timestable.bas",
+    "title": "A multiplication table laid out with TAB",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "classic/weekday.bas",
+    "title": "Day of the week for famous dates, by Zeller's congruence",
+    "group": "Classics",
+    "input": false
+  },
+  {
+    "file": "games/23matches.bas",
+    "title": "23matches",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/3dplot.bas",
+    "title": "3dplot",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": false
+  },
+  {
+    "file": "games/aceyducey.bas",
+    "title": "Aceyducey",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/amazing.bas",
+    "title": "Amazing",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/animal.bas",
+    "title": "Animal",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/awari.bas",
+    "title": "Awari",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bagels.bas",
+    "title": "Bagels",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/banner.bas",
+    "title": "Banner",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/basketball.bas",
+    "title": "Basketball",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/batnum.bas",
+    "title": "Batnum",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/battle.bas",
+    "title": "Battle",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/blackjack.bas",
+    "title": "Blackjack",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bombardment.bas",
+    "title": "Bombardment",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bombsaway.bas",
+    "title": "Bombsaway",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bounce.bas",
+    "title": "Bounce",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bowling.bas",
+    "title": "Bowling",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/boxing.bas",
+    "title": "Boxing",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bug.bas",
+    "title": "Bug",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bullfight.bas",
+    "title": "Bullfight",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bullseye.bas",
+    "title": "Bullseye",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/bunny.bas",
+    "title": "Bunny",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": false
+  },
+  {
+    "file": "games/buzzword.bas",
+    "title": "Buzzword",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/calendar.bas",
+    "title": "Calendar",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": false
+  },
+  {
+    "file": "games/change.bas",
+    "title": "Change",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/checkers.bas",
+    "title": "Checkers",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/chemist.bas",
+    "title": "Chemist",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/chief.bas",
+    "title": "Chief",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/chomp.bas",
+    "title": "Chomp",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/civilwar.bas",
+    "title": "Civilwar",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/combat.bas",
+    "title": "Combat",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/craps.bas",
+    "title": "Craps",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/cube.bas",
+    "title": "Cube",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/depthcharge.bas",
+    "title": "Depthcharge",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/dice.bas",
+    "title": "Dice",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/digits.bas",
+    "title": "Digits",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/distributions.bas",
+    "title": "Distributions",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": false
+  },
+  {
+    "file": "games/evenwins.bas",
+    "title": "Evenwins",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/flipflop.bas",
+    "title": "Flipflop",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/football.bas",
+    "title": "Football",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/ftball.bas",
+    "title": "Ftball",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/furtrader.bas",
+    "title": "Furtrader",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/gameofevenwins.bas",
+    "title": "Gameofevenwins",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/golf.bas",
+    "title": "Golf",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/gomoko.bas",
+    "title": "Gomoko",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/guess.bas",
+    "title": "Guess",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/gunner.bas",
+    "title": "Gunner",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/hangman.bas",
+    "title": "Hangman",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/hello.bas",
+    "title": "Hello",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/hexapawn.bas",
+    "title": "Hexapawn",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/highiq.bas",
+    "title": "Highiq",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/hockey.bas",
+    "title": "Hockey",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/horserace.bas",
+    "title": "Horserace",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/hurkle.bas",
+    "title": "Hurkle",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/kinema.bas",
+    "title": "Kinema",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/king.bas",
+    "title": "King",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/lem.bas",
+    "title": "Lem",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/letter.bas",
+    "title": "Letter",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/life.bas",
+    "title": "Life",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/lifefortwo.bas",
+    "title": "Lifefortwo",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/litquiz.bas",
+    "title": "Litquiz",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/love.bas",
+    "title": "Love",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/mastermind.bas",
+    "title": "Mastermind",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/mathdice.bas",
+    "title": "Mathdice",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/mugwump.bas",
+    "title": "Mugwump",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/name.bas",
+    "title": "Name",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/nicomachus.bas",
+    "title": "Nicomachus",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/nim.bas",
+    "title": "Nim",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/number.bas",
+    "title": "Number",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/onecheck.bas",
+    "title": "Onecheck",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/orbit.bas",
+    "title": "Orbit",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/pizza.bas",
+    "title": "Pizza",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/poetry.bas",
+    "title": "Poetry",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": false
+  },
+  {
+    "file": "games/poker.bas",
+    "title": "Poker",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/qubit.bas",
+    "title": "Qubit",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/queen.bas",
+    "title": "Queen",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/reverse.bas",
+    "title": "Reverse",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/rocket.bas",
+    "title": "Rocket",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/rockscissors.bas",
+    "title": "Rockscissors",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/roulette.bas",
+    "title": "Roulette",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/russianroulette.bas",
+    "title": "Russianroulette",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/salvo.bas",
+    "title": "Salvo",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/sinewave.bas",
+    "title": "Sinewave",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": false
+  },
+  {
+    "file": "games/slalom.bas",
+    "title": "Slalom",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/slots.bas",
+    "title": "Slots",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/splat.bas",
+    "title": "Splat",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/stars.bas",
+    "title": "Stars",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/stockmarket.bas",
+    "title": "Stockmarket",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/superstartrekins.bas",
+    "title": "Superstartrekins",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/synonym.bas",
+    "title": "Synonym",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/target.bas",
+    "title": "Target",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/tictactoe1.bas",
+    "title": "Tictactoe1",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/tictactoe2.bas",
+    "title": "Tictactoe2",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/tower.bas",
+    "title": "Tower",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/train.bas",
+    "title": "Train",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/trap.bas",
+    "title": "Trap",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/war.bas",
+    "title": "War",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/weekday.bas",
+    "title": "Weekday",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
+  },
+  {
+    "file": "games/word.bas",
+    "title": "Word",
+    "group": "BASIC Computer Games, 1978",
+    "credit": "BASIC Computer Games, 1978",
+    "input": true
   }
 ]

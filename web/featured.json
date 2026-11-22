@@ -1,0 +1,93 @@
+[
+  {
+    "from": "samples/dartmouth/preface.bas",
+    "group": "The 1964 manual",
+    "title": "1964: the preface's program",
+    "scan": "p01-preface.jpg",
+    "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 1",
+    "prints": "5",
+    "details": [
+      "detail-preface-program.jpg"
+    ]
+  },
+  {
+    "from": "samples/dartmouth/example1.bas",
+    "group": "The 1964 manual",
+    "title": "1964: example 1, average of 100 logs",
+    "scan": "p21-examples.jpg",
+    "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 21",
+    "prints": "1.5797"
+  },
+  {
+    "from": "samples/dartmouth/example2.bas",
+    "group": "The 1964 manual",
+    "title": "1964: example 2, quadratic equation",
+    "dialect": "dartmouth",
+    "scan": "p22-results.jpg",
+    "credit": "First BASIC instruction manual, Dartmouth, May 1964, pp. 21-22",
+    "prints": "IMAGINARY PART = 1.41421",
+    "details": [
+      "detail-program-2-line-40.jpg",
+      "detail-sqr-absolute-value.jpg",
+      "detail-program-2-result.jpg"
+    ]
+  },
+  {
+    "from": "samples/dartmouth/example3.bas",
+    "group": "The 1964 manual",
+    "title": "1964: example 3, root of a function",
+    "scan": "p23-example-3.jpg",
+    "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 23",
+    "prints": "ROOT = .837585"
+  },
+  {
+    "from": "samples/classic/hello.bas",
+    "group": "Start here",
+    "title": "Hello, world"
+  },
+  {
+    "from": "samples/classic/primes.bas",
+    "group": "Start here",
+    "title": "Primes"
+  },
+  {
+    "from": "samples/classic/mandelbrot.bas",
+    "group": "Start here",
+    "title": "Mandelbrot set"
+  },
+  {
+    "from": "samples/classic/guess.bas",
+    "group": "Start here",
+    "title": "Guess the number"
+  },
+  {
+    "from": "samples/games/hi-lo.bas",
+    "group": "Start here",
+    "title": "Hi-Lo (game)",
+    "credit": "BASIC Computer Games, 1978"
+  },
+  {
+    "from": "samples/games/hammurabi.bas",
+    "group": "Start here",
+    "title": "Hammurabi (game)",
+    "credit": "BASIC Computer Games, 1978"
+  },
+  {
+    "from": "samples/games/lunar.bas",
+    "group": "Start here",
+    "title": "Lunar Lander (game)",
+    "credit": "BASIC Computer Games, 1978"
+  },
+  {
+    "from": "samples/games/superstartrek.bas",
+    "group": "Start here",
+    "title": "Super Star Trek (game)",
+    "credit": "BASIC Computer Games, 1978"
+  },
+  {
+    "from": "samples/games/diamond.bas",
+    "group": "Start here",
+    "title": "Diamond (pattern)",
+    "credit": "BASIC Computer Games, 1978"
+  }
+]

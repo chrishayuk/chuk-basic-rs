@@ -178,21 +178,34 @@ await test("the 1964 manual's quadratic example needs Dartmouth arithmetic", () 
 });
 
 // the bundled examples
-await test("every example in web/examples loads and starts", () => {
+await test("every example in web/examples runs as the native binary does", () => {
   const examples = JSON.parse(read(join(web, "examples", "index.json")));
-  assert.ok(examples.length >= 8);
+  assert.ok(examples.length >= 140, `${examples.length} examples`);
+  let compared = 0;
+  const endless = [];
   for (const example of examples) {
-    const source = read(join(web, "examples", example.file));
-    const result = runProgram(module, { source, seed: 42, dialect: example.dialect });
-    // the 1964 quadratic example reads DATA until there is none left
-    const ranOut = result.status === "error" && result.message.includes("Out of DATA");
-    assert.ok(
-      result.status === "done" || result.status === "waiting" || ranOut,
-      `${example.file}: ${result.status} ${result.message}`,
-    );
+    const path = join(web, "examples", example.file);
+    const result = runProgram(module, { source: read(path), seed: 42, dialect: example.dialect });
     assert.equal(result.status === "waiting", example.input, `${example.file}: "input" in the manifest`);
     assert.ok(transcriptText(result).length > 0, `${example.file} prints something`);
+    if (example.input) continue;
+    // a program that reads nothing must print what the native binary prints,
+    // and end the same way (two examples end by running out of DATA or on an error)
+    const args = ["--seed", "42", ...(example.dialect ? ["--dialect", example.dialect] : []), path];
+    const reference = spawnSync(native, args, { encoding: "utf8", input: "" });
+    if (result.status === "step-limit" || result.status === "output-limit") {
+      // an endless program: the page stops it sooner than the command line does
+      const [a, b] = [transcriptText(result), reference.stdout];
+      const shared = Math.min(a.length, b.length);
+      assert.equal(a.slice(0, shared), b.slice(0, shared), example.file);
+      endless.push(example.file);
+    } else {
+      assert.equal(transcriptText(result), reference.stdout, example.file);
+      assert.equal(result.message, reference.stderr.trim(), example.file);
+    }
+    compared += 1;
   }
+  console.log(`     (${examples.length} examples, ${compared} compared with the native binary; endless: ${endless.join(", ") || "none"})`);
 });
 
 await test("superstartrek.bas: a long line of input and several commands", async () => {

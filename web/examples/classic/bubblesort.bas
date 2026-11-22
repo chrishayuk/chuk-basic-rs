@@ -1,0 +1,17 @@
+10 REM Bubble sort of numbers held in DATA
+20 READ N
+30 DIM A(N)
+40 FOR I = 1 TO N: READ A(I): NEXT I
+50 PRINT "BEFORE:";: GOSUB 200
+60 FOR I = 1 TO N - 1
+70   FOR J = 1 TO N - I
+80     IF A(J) > A(J + 1) THEN T = A(J): A(J) = A(J + 1): A(J + 1) = T
+90   NEXT J
+100 NEXT I
+110 PRINT "AFTER: ";: GOSUB 200
+120 END
+200 FOR K = 1 TO N: PRINT A(K);: NEXT K
+210 PRINT
+220 RETURN
+300 DATA 10
+310 DATA 34, 7, 23, 32, 5, 62, 32, 7, -4, 0

@@ -290,15 +290,25 @@ async function loadExample(file) {
 async function loadExamples() {
   try {
     const list = JSON.parse(await fetchText(new URL("index.json", EXAMPLES_URL)));
-    examples.replaceChildren(
-      ...list.map((example) => {
-        const option = document.createElement("option");
-        option.value = example.file;
-        dialects.set(example.file, example.dialect);
-        option.textContent = example.title;
-        return option;
-      }),
-    );
+    const groups = new Map();
+    for (const example of list) {
+      const option = new Option(example.title, example.file);
+      dialects.set(example.file, example.dialect);
+      const name = example.group || "Examples";
+      if (!groups.has(name)) {
+        const group = document.createElement("optgroup");
+        group.label = name;
+        groups.set(name, group);
+      }
+      groups.get(name).append(option);
+    }
+    examples.replaceChildren(...groups.values());
+    const wanted = new URLSearchParams(location.search).get("example");
+    const chosen = list.find((example) => example.file.replace(/\.bas$/, "") === wanted);
+    if (chosen) {
+      examples.value = chosen.file;
+      await loadExample(chosen.file);
+    }
     if (list.length > 0 && editor.value === "") await loadExample(list[0].file);
   } catch (error) {
     examples.replaceChildren(new Option("(no examples)", ""));

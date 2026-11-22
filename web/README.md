@@ -22,7 +22,7 @@ refuse to load module scripts and wasm from there.
 
 `chuk-basic.wasm` is **not committed** (it is in `web/.gitignore`). To publish
 the playground, run `web/build.sh` and upload the contents of `web/`.
-`build.sh` also refreshes `examples/*.bas` from `samples/`.
+`build.sh` also rebuilds `examples/` from `samples/`.
 
 ## Files
 
@@ -32,14 +32,20 @@ the playground, run `web/build.sh` and upload the contents of `web/`.
 | `wasi.js` | a small WASI preview 1 host: arguments, an in-memory file system holding the program, captured stdout/stderr, stdin from a list of lines. No DOM, so it also runs under node |
 | `session.js` | `runProgram` (one run, with a status) and `Session` (the re-run trick below). Shared by the page and the tests |
 | `worker.js` | runs `runProgram` off the main thread |
-| `examples/` | programs for the drop-down, copied from `samples/`, and `index.json` listing them |
+| `examples/` | programs for the drop-down and `index.json` listing them, written by `build-examples.mjs` from `samples/` and `featured.json` |
 | `test.mjs` | tests, under node |
 | `build.sh`, `serve.sh` | as above |
 
-To add an example, put the `.bas` file in `examples/`, add it to
-`examples/index.json` (`"input"` says whether it asks for input; the test
-checks it), and add it to the copy list in `build.sh` if it comes from
-`samples/`.
+The drop-down offers 142 programs in groups: the four from the 1964 manual,
+nine to start with, the tutorial's fourteen, seventeen classics and the rest
+of the 103 games. `build-examples.mjs` gathers them: the programs named in
+`featured.json` come first, with the titles, manual pages and credits written
+there, then everything else in `samples/tutorial`, `samples/classic` and
+`samples/games`. Whether a program asks for input is found by running it.
+To feature a program, add it to `featured.json` and run `web/build.sh`.
+
+Add `?example=hammurabi` (or `?example=games/animal`) to the address to open
+a particular program.
 
 ## How INPUT works: run it again
 

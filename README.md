@@ -135,8 +135,9 @@ scripts/wasi-check.sh               # every sample: native and WASI output must 
 ### In the browser
 
 [`web/`](web/README.md) is a static page - editor, output, an input line -
-that runs the WASI build with a small WASI shim written for it. No server
-side, no dependencies:
+that runs the WASI build with a small WASI shim written for it. It offers
+142 of the sample programs, the games included, and each one that reads no
+input is checked against the native binary. No server side, no dependencies:
 
 ```bash
 web/build.sh && web/serve.sh        # then open http://localhost:8000
@@ -436,7 +437,7 @@ cargo test
 | `tests/compiled.rs` | every program compiled to WebAssembly prints what the interpreter prints (needs wasmtime) |
 | `tests/tutorial.rs` | every listing and output in the tutorial is real |
 | `tests/samples.rs` | the original samples, including a full game of Basketball |
-| `web/test.mjs` | the playground's WASI shim and session logic, in node |
+| `web/test.mjs` | the playground's WASI shim and session logic, and all 142 of its example programs, in node |
 
 After a deliberate change in behaviour, `UPDATE_GOLDEN=1 cargo test --test
 golden` rewrites the transcripts; review the diff before committing it.
