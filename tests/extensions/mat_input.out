@@ -1,0 +1,9 @@
+ENTER A 2 X 2 MATRIX, ONE ROW PER LINE
+? 2,0
+? 0,4
+ 2  0 
+ 0  4 
+
+ .5  0 
+ 0  .25 
+

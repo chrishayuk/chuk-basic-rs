@@ -4,8 +4,9 @@
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use crate::ast::{DataItem, Expr, Program, Stmt};
+use crate::ast::{Expr, Program, Stmt};
 use crate::error::{Error, Result};
+use crate::rt::DataPool;
 
 pub(super) enum Op {
     Stmt(Stmt),
@@ -34,9 +35,7 @@ pub(super) struct Compiled {
     pub(super) op_line: Vec<Option<u32>>,
     /// Line number -> index of the first op of that line.
     pub(super) line_map: HashMap<u32, usize>,
-    pub(super) data: Vec<DataItem>,
-    /// (line number, index of the first DATA item on or after that line)
-    pub(super) data_lines: Vec<(u32, usize)>,
+    pub(super) data: DataPool,
     pub(super) funcs: HashMap<String, Rc<Func>>,
 }
 
@@ -45,6 +44,8 @@ struct Compiler {
     line: Option<u32>,
     /// Open multi-line DEFs: index of the jump that skips the body.
     open_defs: Vec<usize>,
+    /// Open WHILE loops: index of the jump that leaves the loop.
+    open_whiles: Vec<usize>,
 }
 
 impl Compiler {
@@ -103,7 +104,7 @@ impl Compiler {
                     self.emit(Op::Next(Some(var)));
                 }
             }
-            Stmt::Data(items) => self.out.data.extend(items),
+            Stmt::Data(items) => items.into_iter().for_each(|item| self.out.data.push(item)),
             Stmt::Def {
                 name,
                 params,
@@ -139,6 +140,17 @@ impl Compiler {
                 self.emit(Op::FnEnd);
                 self.patch(skip);
             }
+            Stmt::While(cond) => {
+                let exit = self.emit(Op::JumpIfFalse(cond, 0));
+                self.open_whiles.push(exit);
+            }
+            Stmt::Wend => {
+                let Some(exit) = self.open_whiles.pop() else {
+                    return Err(Error::syntax("WEND without WHILE", self.line, None));
+                };
+                self.emit(Op::Jump(exit)); // back to test the condition again
+                self.patch(exit);
+            }
             Stmt::Rem(_) => {}
             other => {
                 self.emit(Op::Stmt(other));
@@ -153,16 +165,20 @@ pub(super) fn compile(program: Program) -> Result<Compiled> {
         out: Compiled::default(),
         line: None,
         open_defs: Vec::new(),
+        open_whiles: Vec::new(),
     };
     for line in program.lines {
         c.line = line.number;
         if let Some(n) = line.number {
             c.out.line_map.insert(n, c.out.ops.len());
-            c.out.data_lines.push((n, c.out.data.len()));
+            c.out.data.mark_line(n);
         }
         for stmt in line.stmts {
             c.stmt(stmt)?;
         }
+    }
+    if !c.open_whiles.is_empty() {
+        return Err(Error::syntax("WHILE without WEND", None, None));
     }
     if !c.open_defs.is_empty() {
         return Err(Error::syntax("DEF without FNEND", None, None));

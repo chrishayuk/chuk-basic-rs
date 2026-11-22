@@ -1,6 +1,6 @@
 //! JSON rendering of the AST, for `--ast` and for tooling.
 
-use super::{DataItem, Expr, LValue, PrintItem, Program, Stmt, UnOp};
+use super::{DataItem, Expr, LValue, Mat, MatExpr, MatTarget, PrintItem, Program, Stmt, UnOp};
 
 /// A minimal JSON document; object keys keep their insertion order.
 enum Json {
@@ -220,9 +220,100 @@ fn stmt(s: &Stmt) -> Json {
         Stmt::Randomize(seed) => {
             Json::node("RandomizeStatement", vec![("seed", option(seed, expr))])
         }
+        Stmt::PrintUsing {
+            format,
+            values,
+            newline,
+        } => Json::node(
+            "PrintUsingStatement",
+            vec![
+                ("format", expr(format)),
+                ("values", list(values, expr)),
+                ("newline", Json::Bool(*newline)),
+            ],
+        ),
+        Stmt::LineInput { prompt, target } => Json::node(
+            "LineInputStatement",
+            vec![
+                ("prompt", option(prompt, |p| Json::str(p))),
+                ("variable", lvalue(target)),
+            ],
+        ),
+        Stmt::While(cond) => Json::node("WhileStatement", vec![("condition", expr(cond))]),
+        Stmt::Wend => Json::node("WendStatement", vec![]),
+        Stmt::Mat(m) => mat(m),
         Stmt::Rem(text) => Json::node("RemStatement", vec![("comment", Json::str(text))]),
         Stmt::End => Json::node("EndStatement", vec![]),
         Stmt::Stop => Json::node("StopStatement", vec![]),
+    }
+}
+
+fn mat_target(target: &MatTarget) -> Json {
+    Json::Obj(vec![
+        ("name", Json::str(&target.name)),
+        ("dimensions", list(&target.dims, expr)),
+    ])
+}
+
+fn mat(m: &Mat) -> Json {
+    match m {
+        Mat::Read(targets) => Json::node(
+            "MatReadStatement",
+            vec![("matrices", list(targets, mat_target))],
+        ),
+        Mat::Input(targets) => Json::node(
+            "MatInputStatement",
+            vec![("matrices", list(targets, mat_target))],
+        ),
+        Mat::Print(items) => Json::node(
+            "MatPrintStatement",
+            vec![(
+                "matrices",
+                list(items, |(name, packed)| {
+                    Json::Obj(vec![
+                        ("name", Json::str(name)),
+                        ("packed", Json::Bool(*packed)),
+                    ])
+                }),
+            )],
+        ),
+        Mat::Assign { target, value } => {
+            let one =
+                |op: &str, a: &str| vec![("operation", Json::str(op)), ("matrix", Json::str(a))];
+            let two = |op: &str, a: &str, b: &str| {
+                vec![
+                    ("operation", Json::str(op)),
+                    ("left", Json::str(a)),
+                    ("right", Json::str(b)),
+                ]
+            };
+            let fill = |op: &str, dims: &[Expr]| {
+                vec![
+                    ("operation", Json::str(op)),
+                    ("dimensions", list(dims, expr)),
+                ]
+            };
+            let mut fields = match value {
+                MatExpr::Copy(a) => one("copy", a),
+                MatExpr::Add(a, b) => two("+", a, b),
+                MatExpr::Sub(a, b) => two("-", a, b),
+                MatExpr::Mul(a, b) => two("*", a, b),
+                MatExpr::Scale(k, a) => {
+                    vec![
+                        ("operation", Json::str("scale")),
+                        ("factor", expr(k)),
+                        ("matrix", Json::str(a)),
+                    ]
+                }
+                MatExpr::Zer(dims) => fill("ZER", dims),
+                MatExpr::Con(dims) => fill("CON", dims),
+                MatExpr::Idn(dims) => fill("IDN", dims),
+                MatExpr::Trn(a) => one("TRN", a),
+                MatExpr::Inv(a) => one("INV", a),
+            };
+            fields.insert(0, ("target", Json::str(target)));
+            Json::node("MatAssignStatement", fields)
+        }
     }
 }
 

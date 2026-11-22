@@ -7,7 +7,7 @@ pub enum Value {
 }
 
 /// The value of a variable that has never been assigned.
-pub(super) fn default_value(name: &str) -> Value {
+pub fn default_value(name: &str) -> Value {
     if name.ends_with('$') {
         Value::Str(String::new())
     } else {

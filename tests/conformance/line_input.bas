@@ -1,0 +1,6 @@
+10 LINE INPUT "TEXT: ";A$
+20 PRINT "[";A$;"]"
+30 LINE INPUT B$
+40 PRINT "[";B$;"]";LEN(B$)
+50 LINE INPUT "Q, AND A? ";C$
+60 PRINT C$

@@ -1,10 +1,10 @@
 //! User functions defined with DEF FN.
 
 use super::compile::FnBody;
-use super::value::{default_value, Value};
 use super::{Exit, Interpreter, MAX_FN_DEPTH};
 use crate::ast::Expr;
 use crate::error::Result;
+use crate::rt::{default_value, Value};
 
 impl Interpreter<'_> {
     pub(super) fn call_fn(&mut self, name: &str, args: &[Expr]) -> Result<Value> {

@@ -393,6 +393,96 @@ fn print_is_forgiving() {
     assert_eq!(run("10 PRINT \"NO END QUOTE"), "NO END QUOTE\n");
 }
 
+// ---- later dialects ---------------------------------------------------------
+
+#[test]
+fn while_and_wend() {
+    assert_eq!(
+        run("10 I=1\n20 WHILE I<4\n30 PRINT I;\n40 I=I+1\n50 WEND"),
+        " 1  2  3 "
+    );
+    assert_eq!(
+        run("10 WHILE 0: PRINT \"NO\": WEND\n20 PRINT \"OK\""),
+        "OK\n"
+    );
+    assert_eq!(
+        run_err("10 WEND").to_string(),
+        "Syntax error in line 10: WEND without WHILE"
+    );
+    assert_eq!(run_err("10 WHILE 1").message, "WHILE without WEND");
+}
+
+#[test]
+fn print_using() {
+    assert_eq!(run("10 PRINT USING \"###.##\";3.14159"), "  3.14\n");
+    assert_eq!(run("10 PRINT USING \"$$#,###.##\";1234.5"), " $1,234.50\n");
+    assert_eq!(
+        run("10 PRINT USING \"& IS ## YEARS\";\"ADA\";36"),
+        "ADA IS 36 YEARS\n"
+    );
+    assert_eq!(run("10 PRINT USING \"##\";123"), "%123\n");
+    assert_eq!(
+        run("10 PRINT USING \"## \";1;2;3;\n20 PRINT \"|\""),
+        " 1  2  3 |\n"
+    );
+    assert!(run_err("10 PRINT USING \"###\";\"A\"")
+        .message
+        .contains("Type mismatch"));
+    assert!(run_err("10 PRINT USING \"ABC\";1")
+        .message
+        .contains("Illegal function call"));
+}
+
+#[test]
+fn line_input_takes_the_whole_line() {
+    assert_eq!(
+        run_with("10 LINE INPUT \"> \";A$\n20 PRINT A$", "a, \"b\"  c\n").0,
+        "> a, \"b\"  c\n"
+    );
+    assert!(run_err("10 LINE INPUT A")
+        .message
+        .contains("string variable"));
+}
+
+#[test]
+fn source_without_spaces() {
+    assert_eq!(run("10 FORI=1TO3:PRINTI;:NEXTI"), " 1  2  3 ");
+    assert_eq!(
+        run("10 A=2:IFA>1THENPRINT\"BIG\"ELSEPRINT\"SMALL\""),
+        "BIG\n"
+    );
+    assert_eq!(run("10 GOSUB100:END\n100 PRINT\"SUB\":RETURN"), "SUB\n");
+    // each line is read on its own: spaced lines keep their long names
+    assert_eq!(
+        run("10 TOTAL = 5\n20 FORI=1TO2:T=T+I:NEXTI\n30 PRINT TOTAL; T"),
+        " 5  3 \n"
+    );
+    // the error reported for a hopeless line is the ordinary one
+    assert_eq!(
+        run_err("10 FOO BAR").to_string(),
+        "Syntax error in line 10: Expected '=', found 'BAR'"
+    );
+}
+
+#[test]
+fn matrices() {
+    let source = "10 DIM A(2,2)\n20 MAT READ A\n30 DATA 1,2,3,4\n40 MAT B=TRN(A)\n50 MAT C=A*B\n60 MAT PRINT C;";
+    assert_eq!(run(source), " 5  11 \n 11  25 \n\n");
+    assert_eq!(
+        run("10 MAT I=IDN(2,2)\n20 PRINT I(1,1);I(1,2);I(0,0)"),
+        " 1  0  0 \n"
+    );
+    assert!(run_err("10 DIM A(2,2)\n20 MAT B=INV(A)")
+        .message
+        .contains("singular"));
+    assert!(run_err("10 DIM A(2,2),B(3,3)\n20 MAT C=A+B")
+        .message
+        .contains("do not match"));
+    assert!(run_err("10 MAT B=A")
+        .message
+        .contains("not been dimensioned"));
+}
+
 // ---- embedding --------------------------------------------------------------
 
 #[test]

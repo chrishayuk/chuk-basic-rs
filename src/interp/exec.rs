@@ -3,12 +3,9 @@
 use std::rc::Rc;
 
 use super::compile::Op;
-use super::format::parse_number;
-use super::rng::{time_seed, Rng};
-use super::value::Value;
 use super::{Exit, Flow, Interpreter};
 use crate::ast::Stmt;
-use crate::error::Result;
+use crate::error::{AtLine, Result};
 
 impl Interpreter<'_> {
     pub(super) fn exec(&mut self, mut pc: usize, in_fn: bool) -> Result<Exit> {
@@ -94,60 +91,38 @@ impl Interpreter<'_> {
             Stmt::Dim(arrays) => {
                 for (name, dims) in arrays {
                     let bounds = self.eval_indices(dims)?;
-                    if self.arrays.contains_key(name) {
-                        return Err(self.err(format!("Array {name} is already dimensioned")));
-                    }
-                    let array = self.new_array(name, bounds.iter().map(|b| b + 1).collect())?;
-                    self.arrays.insert(name.clone(), array);
+                    self.arrays.dim(name, &bounds).at(self.line)?;
                 }
             }
             Stmt::Read(targets) => {
                 for target in targets {
-                    let Some(item) = self.data.get(self.data_ptr).cloned() else {
-                        return Err(self.err("Out of DATA"));
-                    };
-                    self.data_ptr += 1;
-                    let value = if target.name.ends_with('$') {
-                        Value::Str(item.text)
-                    } else {
-                        // an empty item (`DATA 1,,3`) reads as zero
-                        let parsed = if item.quoted {
-                            None
-                        } else if item.text.is_empty() {
-                            Some(0.0)
-                        } else {
-                            parse_number(&item.text)
-                        };
-                        Value::Num(parsed.ok_or_else(|| {
-                            self.err(format!("Bad number in DATA: {}", item.text))
-                        })?)
-                    };
+                    let value = self.data.read(target.name.ends_with('$')).at(self.line)?;
                     self.assign(target, value)?;
                 }
             }
-            Stmt::Restore(line) => {
-                self.data_ptr = match line {
-                    None => 0,
-                    Some(line) => self
-                        .data_lines
-                        .iter()
-                        .find(|(n, _)| n >= line)
-                        .map_or(self.data.len(), |&(_, index)| index),
-                };
-            }
+            Stmt::Restore(line) => self.data.restore(*line),
             Stmt::Randomize(seed) => {
                 let seed = match seed {
-                    Some(expr) => self.eval_num(expr)?.to_bits(),
-                    None => time_seed(),
+                    Some(expr) => Some(self.eval_num(expr)?),
+                    None => None,
                 };
-                self.rng = Rng::new(seed);
+                self.rnd.randomize(seed);
             }
+            Stmt::PrintUsing {
+                format,
+                values,
+                newline,
+            } => self.print_using(format, values, *newline)?,
+            Stmt::LineInput { prompt, target } => self.line_input(prompt.as_deref(), target)?,
+            Stmt::Mat(statement) => self.mat(statement)?,
             Stmt::End | Stmt::Stop => return Ok(Flow::Halt),
             // removed or rewritten by `compile`
             Stmt::If { .. }
             | Stmt::Next(_)
             | Stmt::Def { .. }
             | Stmt::FnEnd
+            | Stmt::While(_)
+            | Stmt::Wend
             | Stmt::Data(_)
             | Stmt::Rem(_) => {}
         }

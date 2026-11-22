@@ -15,12 +15,13 @@ pub mod error;
 pub mod interp;
 pub mod lexer;
 pub mod parser;
+pub mod rt;
 
 use std::io::{BufRead, Write};
 
 pub use error::{Error, ErrorKind, Result};
 pub use interp::Interpreter;
-pub use lexer::tokenize;
+pub use lexer::{tokenize, tokenize_line, Spacing};
 pub use parser::parse;
 
 /// Parse and run a program, reading INPUT from `input` and printing to

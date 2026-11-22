@@ -218,3 +218,62 @@ fn rem_prefix() {
         vec![id("X"), Tok::Eq, id("REMAIN"), Tok::Eol]
     );
 }
+
+fn crunched(src: &str) -> Vec<Tok> {
+    tokenize_line(src, 1, Spacing::Crunched)
+        .unwrap()
+        .into_iter()
+        .map(|t| t.tok)
+        .collect()
+}
+
+#[test]
+fn crunched_source_finds_keywords_anywhere() {
+    assert_eq!(
+        crunched("FORI=1TOQ1STEP2"),
+        vec![
+            Tok::For,
+            id("I"),
+            Tok::Eq,
+            Tok::Num(1.0),
+            Tok::To,
+            id("Q1"),
+            Tok::Step,
+            Tok::Num(2.0),
+            Tok::Eol
+        ]
+    );
+    assert_eq!(
+        crunched("IFA$=B$THENPRINTA$"),
+        vec![
+            Tok::If,
+            id("A$"),
+            Tok::Eq,
+            id("B$"),
+            Tok::Then,
+            Tok::Print,
+            id("A$"),
+            Tok::Eol
+        ]
+    );
+    assert_eq!(crunched("X=LEFT$(A$,2)")[2], id("LEFT$"));
+    assert_eq!(
+        crunched("GOSUB10"),
+        vec![Tok::Gosub, Tok::Num(10.0), Tok::Eol]
+    );
+    assert_eq!(crunched("DEFFNA(X)=X")[..3], [Tok::Def, id("FN"), id("A")]);
+    // which is exactly why spaced source is tried first
+    assert_eq!(crunched("TOTAL"), vec![Tok::To, id("TAL"), Tok::Eol]);
+}
+
+#[test]
+fn line_input_is_one_token() {
+    assert_eq!(
+        toks("LINE INPUT A$"),
+        vec![Tok::LineInput, id("A$"), Tok::Eol]
+    );
+    assert_eq!(
+        toks("LINE = 5"),
+        vec![id("LINE"), Tok::Eq, Tok::Num(5.0), Tok::Eol]
+    );
+}

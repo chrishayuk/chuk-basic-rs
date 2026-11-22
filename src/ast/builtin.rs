@@ -15,6 +15,9 @@ macro_rules! builtins {
                 match self { $(Builtin::$variant => $name,)* }
             }
 
+            /// The names of all built-in functions.
+            pub const NAMES: &'static [&'static str] = &[$($name,)*];
+
             /// Minimum and maximum number of arguments.
             pub fn arity(self) -> (usize, usize) {
                 match self { $(Builtin::$variant => ($min, $max),)* }
@@ -44,4 +47,7 @@ builtins! {
     Left => "LEFT$", 2, 2;
     Right => "RIGHT$", 2, 2;
     Mid => "MID$", 2, 3;
+    Instr => "INSTR", 2, 3;
+    Space => "SPACE$", 1, 1;
+    StringOf => "STRING$", 2, 2;
 }

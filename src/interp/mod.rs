@@ -11,37 +11,24 @@ mod compile;
 mod control;
 mod eval;
 mod exec;
-mod format;
 mod functions;
 mod io;
-mod rng;
-mod value;
+mod mat;
 mod vars;
-
-pub use format::format_number;
-pub use value::Value;
 
 use std::collections::HashMap;
 use std::io::{BufRead, Write};
 use std::rc::Rc;
 
-use crate::ast::{DataItem, Program};
-use crate::error::{Error, ErrorKind, Result};
+use crate::ast::Program;
+use crate::error::{AtLine, Error, Result};
+use crate::rt::{Arrays, Console, DataPool, Rnd, Value};
 use compile::{compile, Func, Op};
-use rng::{time_seed, Rng};
 
-const ZONE_WIDTH: usize = 14;
 /// Each BASIC call nests several interpreter frames on the native stack, so
 /// this is kept well inside a 1 MiB WebAssembly stack.
 const MAX_FN_DEPTH: usize = 64;
 const MAX_GOSUB_DEPTH: usize = 100_000;
-const MAX_ARRAY_ELEMENTS: usize = 10_000_000;
-
-struct Array {
-    /// Size of each dimension (upper bound + 1).
-    dims: Vec<usize>,
-    data: Vec<Value>,
-}
 
 struct ForFrame {
     var: String,
@@ -73,13 +60,14 @@ pub struct Interpreter<'a> {
     ops: Rc<Vec<Op>>,
     op_line: Vec<Option<u32>>,
     line_map: HashMap<u32, usize>,
-    data: Vec<DataItem>,
-    data_lines: Vec<(u32, usize)>,
-    data_ptr: usize,
     funcs: HashMap<String, Rc<Func>>,
 
     vars: HashMap<String, Value>,
-    arrays: HashMap<String, Array>,
+    arrays: Arrays,
+    data: DataPool,
+    console: Console<'a>,
+    rnd: Rnd,
+
     for_stack: Vec<ForFrame>,
     gosub_stack: Vec<GosubFrame>,
     /// Stack heights on entry to the running multi-line function.
@@ -90,16 +78,8 @@ pub struct Interpreter<'a> {
     /// Ops executed so far, and the most that may be executed.
     steps: u64,
     step_limit: Option<u64>,
-    /// Copy each line read by INPUT to the output.
-    echo_input: bool,
+    /// The line being executed, for error messages.
     line: Option<u32>,
-
-    input: &'a mut dyn BufRead,
-    output: &'a mut dyn Write,
-    /// Current output column, for TAB and print zones.
-    col: usize,
-    rng: Rng,
-    last_rnd: f64,
 }
 
 impl<'a> Interpreter<'a> {
@@ -116,12 +96,12 @@ impl<'a> Interpreter<'a> {
             ops: Rc::new(c.ops),
             op_line: c.op_line,
             line_map: c.line_map,
-            data: c.data,
-            data_lines: c.data_lines,
-            data_ptr: 0,
             funcs: c.funcs,
             vars: HashMap::new(),
-            arrays: HashMap::new(),
+            arrays: Arrays::default(),
+            data: c.data,
+            console: Console::new(input, output),
+            rnd: Rnd::new(seed),
             for_stack: Vec::new(),
             gosub_stack: Vec::new(),
             fn_gosub_base: 0,
@@ -130,13 +110,7 @@ impl<'a> Interpreter<'a> {
             halted: false,
             steps: 0,
             step_limit: None,
-            echo_input: false,
             line: None,
-            input,
-            output,
-            col: 0,
-            rng: Rng::new(seed.unwrap_or_else(time_seed)),
-            last_rnd: 0.0,
         })
     }
 
@@ -150,26 +124,18 @@ impl<'a> Interpreter<'a> {
     /// what is typed; this makes the transcript read the same way when input
     /// comes from a file or a pipe.
     pub fn set_echo_input(&mut self, echo: bool) {
-        self.echo_input = echo;
+        self.console.set_echo(echo);
     }
 
     /// Run the program to completion.
     pub fn run(&mut self) -> Result<()> {
         let result = self.exec(0, false).map(|_| ());
-        let flushed = self.output.flush();
-        result?;
-        flushed.map_err(|e| self.io_err(e))
+        let flushed = self.console.flush().at(self.line);
+        result.and(flushed)
     }
 
     fn err(&self, message: impl Into<String>) -> Error {
         Error::runtime(message, self.line)
-    }
-
-    fn io_err(&self, e: std::io::Error) -> Error {
-        Error {
-            kind: ErrorKind::Io(e.kind()),
-            ..self.err(e.to_string())
-        }
     }
 
     fn type_mismatch(&self) -> Error {

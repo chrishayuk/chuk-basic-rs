@@ -44,6 +44,26 @@ impl Error {
     }
 }
 
+impl Error {
+    /// A failure of the input or output stream.
+    pub fn io(error: &std::io::Error) -> Self {
+        Error {
+            kind: ErrorKind::Io(error.kind()),
+            message: error.to_string(),
+            line: None,
+            src_line: None,
+        }
+    }
+
+    /// Fill in the BASIC line number, if the error does not have one yet.
+    pub fn at_line(self, line: Option<u32>) -> Self {
+        Error {
+            line: self.line.or(line),
+            ..self
+        }
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let kind = match self.kind {
@@ -60,3 +80,14 @@ impl fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+/// Adds the line number to an error raised by code that does not know it.
+pub(crate) trait AtLine<T> {
+    fn at(self, line: Option<u32>) -> Result<T>;
+}
+
+impl<T> AtLine<T> for Result<T> {
+    fn at(self, line: Option<u32>) -> Result<T> {
+        self.map_err(|error| error.at_line(line))
+    }
+}

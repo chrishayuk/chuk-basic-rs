@@ -2,6 +2,7 @@
 
 mod data;
 mod expr;
+mod mat;
 mod stmt;
 
 #[cfg(test)]
@@ -9,18 +10,80 @@ mod tests;
 
 use crate::ast::{Line, Program, Stmt};
 use crate::error::{Error, Result};
-use crate::lexer::{tokenize, Tok, Token};
+use crate::lexer::{tokenize_line, Spacing, Tok, Token};
 
 /// Tokenize and parse a whole program.
 pub fn parse(source: &str) -> Result<Program> {
-    Parser {
-        toks: tokenize(source)?,
-        pos: 0,
-        line: None,
+    let mut lines = Vec::new();
+    for (i, raw) in source.lines().enumerate() {
+        // Most programs put spaces around their keywords. A line that makes
+        // no sense that way is tried again as "crunched" source, in which
+        // keywords are found anywhere (`FORI=1TO10`).
+        let line = match parse_line(raw, i + 1, Spacing::Spaced) {
+            Ok(line) => line,
+            Err(error) => parse_line(raw, i + 1, Spacing::Crunched).map_err(|_| error)?,
+        };
+        lines.extend(line);
     }
-    .program()
+    in_execution_order(lines)
 }
 
+/// Parse one source line; a blank line gives `None`.
+fn parse_line(raw: &str, src_line: usize, spacing: Spacing) -> Result<Option<Line>> {
+    let toks = tokenize_line(raw, src_line, spacing)?;
+    if toks.is_empty() {
+        return Ok(None);
+    }
+    let mut parser = Parser {
+        toks,
+        pos: 0,
+        line: None,
+    };
+    if let Tok::LineNo(n) = *parser.peek() {
+        parser.pos += 1;
+        parser.line = Some(n);
+    }
+    let stmts = parser.stmts(false)?;
+    if !parser.eat(&Tok::Eol) {
+        return Err(parser.err(format!("Unexpected {}", describe(parser.peek()))));
+    }
+    let numbered_or_not_empty = parser.line.is_some() || !stmts.is_empty();
+    Ok(numbered_or_not_empty.then_some(Line {
+        number: parser.line,
+        src_line,
+        stmts,
+    }))
+}
+
+/// Execution order is line-number order; an unnumbered line stays attached
+/// to the numbered line before it.
+fn in_execution_order(lines: Vec<Line>) -> Result<Program> {
+    let mut key = 0;
+    let mut keyed: Vec<(u32, Line)> = lines
+        .into_iter()
+        .map(|line| {
+            key = line.number.unwrap_or(key);
+            (key, line)
+        })
+        .collect();
+    keyed.sort_by_key(|(key, _)| *key);
+    let lines: Vec<Line> = keyed.into_iter().map(|(_, line)| line).collect();
+
+    let mut last: Option<u32> = None;
+    for line in lines.iter().filter(|l| l.number.is_some()) {
+        if line.number == last {
+            return Err(Error::syntax(
+                "Duplicate line number",
+                line.number,
+                Some(line.src_line),
+            ));
+        }
+        last = line.number;
+    }
+    Ok(Program { lines })
+}
+
+/// Parser state for one source line.
 struct Parser {
     toks: Vec<Token>,
     pos: usize,
@@ -90,55 +153,6 @@ impl Parser {
                 )))
             }
         }
-    }
-
-    fn program(mut self) -> Result<Program> {
-        let mut lines: Vec<Line> = Vec::new();
-        while self.pos < self.toks.len() {
-            let src_line = self.toks[self.pos].src_line;
-            self.line = None;
-            if let Tok::LineNo(n) = *self.peek() {
-                self.pos += 1;
-                self.line = Some(n);
-            }
-            let stmts = self.stmts(false)?;
-            if !self.eat(&Tok::Eol) {
-                return Err(self.err(format!("Unexpected {}", describe(self.peek()))));
-            }
-            if self.line.is_some() || !stmts.is_empty() {
-                lines.push(Line {
-                    number: self.line,
-                    src_line,
-                    stmts,
-                });
-            }
-        }
-
-        // Execution order is line-number order; an unnumbered line stays
-        // attached to the numbered line before it.
-        let mut key = 0;
-        let mut keyed: Vec<(u32, Line)> = lines
-            .into_iter()
-            .map(|line| {
-                key = line.number.unwrap_or(key);
-                (key, line)
-            })
-            .collect();
-        keyed.sort_by_key(|(key, _)| *key);
-        let lines: Vec<Line> = keyed.into_iter().map(|(_, line)| line).collect();
-
-        let mut last: Option<u32> = None;
-        for line in lines.iter().filter(|l| l.number.is_some()) {
-            if line.number == last {
-                return Err(Error::syntax(
-                    "Duplicate line number",
-                    line.number,
-                    Some(line.src_line),
-                ));
-            }
-            last = line.number;
-        }
-        Ok(Program { lines })
     }
 
     /// Colon-separated statements up to the end of the line (or up to an

@@ -1,10 +1,10 @@
 //! Control flow: GOTO / GOSUB targets and FOR / NEXT loops.
 
 use super::compile::Op;
-use super::value::Value;
 use super::{Flow, ForFrame, GosubFrame, Interpreter, MAX_GOSUB_DEPTH};
 use crate::ast::{Expr, Stmt};
 use crate::error::Result;
+use crate::rt::Value;
 
 impl Interpreter<'_> {
     pub(super) fn target(&self, line: u32) -> Result<usize> {

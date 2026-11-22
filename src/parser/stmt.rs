@@ -14,7 +14,12 @@ impl Parser {
                 self.pos -= 1; // implicit LET
                 self.let_stmt()
             }
+            Tok::Print if self.eat(&Tok::Using) => self.print_using_stmt(),
             Tok::Print => self.print_stmt(),
+            Tok::LineInput => self.line_input_stmt(),
+            Tok::While => Ok(Stmt::While(self.expr()?)),
+            Tok::Wend => Ok(Stmt::Wend),
+            Tok::Mat => self.mat_stmt(),
             Tok::Input => self.input_stmt(),
             Tok::If => self.if_stmt(),
             Tok::For => self.for_stmt(),
@@ -133,6 +138,43 @@ impl Parser {
             items.push(item);
         }
         Ok(Stmt::Print(items))
+    }
+
+    /// `PRINT USING format$; value [, value ...] [;]`
+    pub(super) fn print_using_stmt(&mut self) -> Result<Stmt> {
+        let format = self.expr()?;
+        self.expect(Tok::Semi, "';' after the format")?;
+        let mut values = Vec::new();
+        let mut newline = true;
+        while !self.at_stmt_end() {
+            values.push(self.expr()?);
+            newline = !(self.eat(&Tok::Semi) || self.eat(&Tok::Comma));
+            if newline {
+                break;
+            }
+        }
+        if values.is_empty() {
+            return Err(self.err("PRINT USING needs something to print"));
+        }
+        Ok(Stmt::PrintUsing {
+            format,
+            values,
+            newline,
+        })
+    }
+
+    /// `LINE INPUT ["prompt";] A$`
+    pub(super) fn line_input_stmt(&mut self) -> Result<Stmt> {
+        let mut prompt = None;
+        if let (Tok::Str(text), Tok::Semi | Tok::Comma) = (self.peek(), self.peek2()) {
+            prompt = Some(text.clone());
+            self.pos += 2;
+        }
+        let target = self.lvalue()?;
+        if !target.name.ends_with('$') {
+            return Err(self.err("LINE INPUT needs a string variable"));
+        }
+        Ok(Stmt::LineInput { prompt, target })
     }
 
     pub(super) fn input_stmt(&mut self) -> Result<Stmt> {

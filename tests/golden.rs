@@ -103,6 +103,13 @@ fn conformance_programs() {
     check_all(beside("tests/conformance"));
 }
 
+/// Features that GW-BASIC cannot be asked about: source written without
+/// spaces, and the Dartmouth MAT statements. Checked by hand.
+#[test]
+fn extension_programs() {
+    check_all(beside("tests/extensions"));
+}
+
 /// Games from the downloaded collection whose output does not depend on
 /// chance (or on more than a line of input).
 #[test]

@@ -9,4 +9,4 @@ mod stmt;
 pub use builtin::Builtin;
 pub use expr::{BinOp, Expr, UnOp};
 pub use program::{Line, Program};
-pub use stmt::{DataItem, LValue, PrintItem, Stmt};
+pub use stmt::{DataItem, LValue, Mat, MatExpr, MatTarget, PrintItem, Stmt};

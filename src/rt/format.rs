@@ -1,7 +1,7 @@
 //! Number formatting and parsing.
 
 /// A number as PRINT and STR$ show it: a leading space stands in for `+`.
-pub(super) fn signed(n: f64) -> String {
+pub fn signed(n: f64) -> String {
     let text = format_number(n);
     if text.starts_with('-') {
         text
@@ -52,7 +52,7 @@ pub fn format_number(n: f64) -> String {
 }
 
 /// Parse a complete numeric literal (as typed at INPUT or written in DATA).
-pub(super) fn parse_number(text: &str) -> Option<f64> {
+pub fn parse_number(text: &str) -> Option<f64> {
     let text: String = text.chars().filter(|c| !c.is_whitespace()).collect();
     // f64::from_str also accepts "inf", "nan" and friends - BASIC does not
     if text.is_empty()
@@ -66,7 +66,7 @@ pub(super) fn parse_number(text: &str) -> Option<f64> {
 }
 
 /// VAL: the value of the longest numeric prefix, or 0.
-pub(super) fn val(text: &str) -> f64 {
+pub fn val(text: &str) -> f64 {
     let text: String = text.chars().filter(|c| !c.is_whitespace()).collect();
     let end = text
         .find(|c: char| !(c.is_ascii_digit() || "+-.eE".contains(c)))

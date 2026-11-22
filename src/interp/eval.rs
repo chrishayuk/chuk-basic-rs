@@ -1,9 +1,9 @@
 //! Expression evaluation.
 
-use super::value::{default_value, Value};
 use super::Interpreter;
 use crate::ast::{BinOp, Expr, UnOp};
 use crate::error::Result;
+use crate::rt::{default_value, Value};
 
 impl Interpreter<'_> {
     pub(super) fn eval_num(&mut self, expr: &Expr) -> Result<f64> {
@@ -18,15 +18,6 @@ impl Interpreter<'_> {
             Value::Str(s) => Ok(s),
             Value::Num(_) => Err(self.type_mismatch()),
         }
-    }
-
-    /// Evaluate a non-negative integer argument (rounded, as MS BASIC does).
-    pub(super) fn eval_count(&mut self, expr: &Expr) -> Result<usize> {
-        let n = self.eval_num(expr)?.round();
-        if !(0.0..=u32::MAX as f64).contains(&n) {
-            return Err(self.err("Illegal function call"));
-        }
-        Ok(n as usize)
     }
 
     pub(super) fn eval(&mut self, expr: &Expr) -> Result<Value> {

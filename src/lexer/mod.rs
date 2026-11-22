@@ -11,22 +11,43 @@ mod tests;
 
 pub use token::{Tok, Token};
 
+use crate::ast::Builtin;
 use crate::error::{Error, Result};
-use token::keyword;
+use token::{keyword, CRUNCHED_WORDS};
 
 /// Tokenize a whole program.
 pub fn tokenize(source: &str) -> Result<Vec<Token>> {
     let mut out = Vec::new();
     for (i, raw) in source.lines().enumerate() {
-        Line {
-            chars: raw.chars().collect(),
-            pos: 0,
-            src_line: i + 1,
-            line_no: None,
-            at_stmt_start: true,
-        }
-        .tokenize(&mut out)?;
+        out.extend(tokenize_line(raw, i + 1, Spacing::Spaced)?);
     }
+    Ok(out)
+}
+
+/// How keywords are told apart from names.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Spacing {
+    /// A keyword is a whole word, so `TOTAL` and `SCORE` are names. Keywords
+    /// glued to a number, string or bracket are still split off.
+    Spaced,
+    /// Keywords are found anywhere, as the original Microsoft interpreters
+    /// did: `FORI=1TO10` is `FOR I = 1 TO 10`, and `TOTAL` is `TO TAL`.
+    Crunched,
+}
+
+/// Tokenize one source line. A blank line gives no tokens; any other ends
+/// with [`Tok::Eol`].
+pub fn tokenize_line(raw: &str, src_line: usize, spacing: Spacing) -> Result<Vec<Token>> {
+    let mut out = Vec::new();
+    Line {
+        chars: raw.chars().collect(),
+        pos: 0,
+        src_line,
+        line_no: None,
+        at_stmt_start: true,
+        spacing,
+    }
+    .tokenize(&mut out)?;
     Ok(out)
 }
 
@@ -38,6 +59,7 @@ struct Line {
     line_no: Option<u32>,
     /// True when the next token begins a statement.
     at_stmt_start: bool,
+    spacing: Spacing,
 }
 
 impl Line {
@@ -161,8 +183,13 @@ impl Line {
 
     fn word(&mut self) -> Result<Tok> {
         let start = self.pos;
-        let mut word = self.read_word();
-        if keyword(&word).is_none() && !matches!(word.as_str(), "REM" | "DATA" | "GO") {
+        let mut word = match self.spacing {
+            Spacing::Spaced => self.read_word(),
+            Spacing::Crunched => self.read_crunched_word(),
+        };
+        let plain_name =
+            keyword(&word).is_none() && !matches!(word.as_str(), "REM" | "DATA" | "GO");
+        if plain_name && self.spacing == Spacing::Spaced {
             // REMARK, REMEMBER ... are comments, as in MS BASIC - unless the
             // word is being assigned to or subscripted like a variable
             if word.starts_with("REM") && self.at_stmt_start && !self.assignment_follows() {
@@ -182,6 +209,11 @@ impl Line {
         match word.as_str() {
             "REM" => Ok(Tok::Rem(self.rest().trim().to_string())),
             "DATA" => Ok(Tok::Data(self.data())),
+            "LINE" if self.next_word_is("INPUT") => {
+                self.skip_ws();
+                self.pos += "INPUT".len();
+                Ok(Tok::LineInput)
+            }
             // GO TO / GO SUB written as two words
             "GO" => {
                 self.skip_ws();
@@ -193,6 +225,55 @@ impl Line {
             }
             _ => Ok(keyword(&word).unwrap_or(Tok::Ident(word))),
         }
+    }
+
+    /// Does `word` come next on the line (after any spaces)?
+    fn next_word_is(&self, word: &str) -> bool {
+        let rest = self.chars[self.pos..]
+            .iter()
+            .skip_while(|c| c.is_whitespace());
+        rest.take(word.len())
+            .map(char::to_ascii_uppercase)
+            .eq(word.chars())
+    }
+
+    /// The reserved word or built-in function name that starts at `at`, if
+    /// any; the longest wins (`GOSUB` over `GO`).
+    fn reserved_at(&self, at: usize) -> Option<&'static str> {
+        let matches = |word: &&&str| {
+            let mut here = self.chars[at..].iter().map(char::to_ascii_uppercase);
+            word.chars().all(|c| here.next() == Some(c))
+        };
+        CRUNCHED_WORDS
+            .iter()
+            .chain(Builtin::NAMES)
+            .filter(matches)
+            .max_by_key(|word| word.len())
+            .copied()
+    }
+
+    /// In crunched source a word is a reserved word if one starts here;
+    /// otherwise it is a name, which runs until the next reserved word.
+    fn read_crunched_word(&mut self) -> String {
+        let start = self.pos;
+        if let Some(word) = self.reserved_at(start) {
+            // a `$` suffix is picked up by the caller
+            self.pos += word.trim_end_matches('$').len();
+        } else {
+            self.pos += 1;
+            while let Some(c) = self.peek() {
+                let more = c.is_ascii_digit()
+                    || (c.is_ascii_alphabetic() && self.reserved_at(self.pos).is_none());
+                if !more {
+                    break;
+                }
+                self.pos += 1;
+            }
+        }
+        self.chars[start..self.pos]
+            .iter()
+            .collect::<String>()
+            .to_ascii_uppercase()
     }
 
     /// Is the next thing on the line `=` or `(`?
