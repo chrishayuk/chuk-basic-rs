@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Licensed under Apache 2.0, as the repository now is. The 0.1.2 file was built just before the change and still carried the MIT text.
+- Tested in a real VS Code on Linux and Windows as well as macOS.
+
 ## 0.1.2
 
 - Completion: after `GOTO`, `GOSUB` and `THEN`, the program's lines; otherwise words that begin as typed.
