@@ -165,6 +165,20 @@ await test("an endless loop after an INPUT is stopped too", async () => {
   assert.equal(transcriptText(result), "GO? 1\n");
 });
 
+await test("a bare RANDOMIZE does not change what was shown before an INPUT", async () => {
+  // the session replays the program at every INPUT; RANDOMIZE without a seed
+  // must give the same numbers each time, or the earlier lines would change
+  const session = new Session(runner, {
+    source: "10 RANDOMIZE\n20 PRINT RND(1)\n30 INPUT X\n40 PRINT RND(1)\n50 INPUT Y\n60 END\n",
+    seed: 42,
+  });
+  const first = transcriptText(await session.start());
+  const second = transcriptText(await session.submit("1"));
+  assert.ok(second.startsWith(first + "1\n"), `${JSON.stringify(first)} then ${JSON.stringify(second)}`);
+  const third = transcriptText(await session.submit("2"));
+  assert.ok(third.startsWith(second + "2\n"));
+});
+
 await test("endless printing is stopped by the output limit", () => {
   const result = runProgram(module, { source: '10 PRINT "SPAM"\n20 GOTO 10\n', seed: 1 });
   assert.equal(result.status, "output-limit");

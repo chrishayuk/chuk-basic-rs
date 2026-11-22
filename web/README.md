@@ -90,8 +90,10 @@ the native binary.
 ### Limits
 
 - **The program must be deterministic** given its seed and input, which a
-  BASIC program here always is: there is no clock, no files, and `RND` and
-  `RANDOMIZE` both come from `--seed`.
+  BASIC program here always is: there are no files, `RND` comes from
+  `--seed`, and a `RANDOMIZE` without a number reseeds from the seeded
+  generator, not from the clock. (Before 22 November 2026 it used the
+  clock, so a replay after `INPUT` could change numbers already shown.)
 - **The cost grows with the session.** Line *n* costs a replay of all *n*
   lines, so a session is quadratic overall. In practice this is hard to
   notice: 300 commands of Super Star Trek replay in about 0.1 s.

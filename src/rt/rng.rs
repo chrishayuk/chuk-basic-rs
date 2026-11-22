@@ -34,6 +34,8 @@ pub fn time_seed() -> u64 {
 pub struct Rnd {
     rng: Rng,
     last: f64,
+    /// Whether the run was given a seed, so that it must repeat exactly.
+    seeded: bool,
 }
 
 impl Rnd {
@@ -42,6 +44,7 @@ impl Rnd {
         Rnd {
             rng: Rng::new(seed.unwrap_or_else(time_seed)),
             last: 0.0,
+            seeded: seed.is_some(),
         }
     }
 
@@ -57,8 +60,36 @@ impl Rnd {
         self.last
     }
 
-    /// `RANDOMIZE [seed]`
+    /// `RANDOMIZE [seed]`. Without a seed it reseeds from the clock - unless
+    /// the run itself was seeded (`--seed`), when it reseeds from the
+    /// generator, so that a seeded run repeats exactly. The playground
+    /// relies on that: it replays a session from the start at every `INPUT`.
     pub fn randomize(&mut self, seed: Option<f64>) {
-        self.rng = Rng::new(seed.map_or_else(time_seed, f64::to_bits));
+        let seed = match seed {
+            Some(seed) => seed.to_bits(),
+            None if self.seeded => self.rng.next_f64().to_bits(),
+            None => time_seed(),
+        };
+        self.rng = Rng::new(seed);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_seeded_run_repeats_even_after_a_bare_randomize() {
+        let run = || {
+            let mut rnd = Rnd::new(Some(42));
+            let first = rnd.rnd(1.0);
+            rnd.randomize(None);
+            (first, rnd.rnd(1.0), rnd.rnd(1.0))
+        };
+        assert_eq!(run(), run());
+        // and RANDOMIZE still changes the sequence
+        let mut plain = Rnd::new(Some(42));
+        plain.rnd(1.0);
+        assert_ne!(plain.rnd(1.0), run().1);
     }
 }
