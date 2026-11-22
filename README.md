@@ -49,12 +49,12 @@ echo '10 PRINT "HELLO, WORLD!"' > hello.bas
 chuk-basic hello.bas
 ```
 
-For Visual Studio Code, download `chuk-basic-0.1.0.vsix` from the
+For Visual Studio Code, download `chuk-basic-0.1.1.vsix` from the
 [latest release](https://github.com/chrishayuk/chuk-basic-rs/releases/latest)
 and install it:
 
 ```bash
-code --install-extension chuk-basic-0.1.0.vsix
+code --install-extension chuk-basic-0.1.1.vsix
 ```
 
 Open any `.bas` file and you get highlighting, problems as you type, hover
@@ -118,7 +118,7 @@ numbered lines to build a program, and commands to work with it.
 
 ```text
 $ chuk-basic
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 10 FOR I = 1 TO 3
 20   PRINT I * I;

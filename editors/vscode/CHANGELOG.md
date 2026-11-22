@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- The hover on `SQR` names the later BASIC that was tested (GW-BASIC) instead of saying "later BASICs".
+
 ## 0.1.0
 
 - Syntax highlighting for line-numbered BASIC (`.bas`), including listings

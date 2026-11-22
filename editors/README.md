@@ -9,10 +9,10 @@ Both are built on [`src/analysis`](../src/analysis), the same code behind `chuk-
 
 ## Visual Studio Code
 
-Download `chuk-basic-0.1.0.vsix` from the [releases page](https://github.com/chrishayuk/chuk-basic-rs/releases), then:
+Download `chuk-basic-0.1.1.vsix` from the [releases page](https://github.com/chrishayuk/chuk-basic-rs/releases), then:
 
 ```sh
-code --install-extension chuk-basic-0.1.0.vsix
+code --install-extension chuk-basic-0.1.1.vsix
 ```
 
 Open any `.bas` file. Nothing else has to be installed: the extension runs its own copy of the interpreter and language server, compiled to WebAssembly.

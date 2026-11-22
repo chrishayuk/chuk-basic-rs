@@ -47,7 +47,7 @@ const WORDS: [(&str, &str, &str); 52] = [
     ("EXP", "EXP(X)", "e to the power X."),
     ("LOG", "LOG(X)", "The natural logarithm of X."),
     ("ABS", "ABS(X)", "X without its sign."),
-    ("SQR", "SQR(X)", "The square root of X. In 1964 it was \"always taken of the absolute value\" (manual, p. 5); later BASICs call a negative X an error."),
+    ("SQR", "SQR(X)", "The square root of X. In 1964 it was \"always taken of the absolute value\" (manual, p. 5); GW-BASIC, a later BASIC, calls a negative X an error."),
     ("INT", "INT(X)", "The whole number at or below X."),
     ("RND", "RND(X)", "The next random number, at least 0 and below 1."),
     ("FIX", "FIX(X)", "X with its fraction cut off."),

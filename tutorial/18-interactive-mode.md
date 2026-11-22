@@ -18,7 +18,7 @@ RUN
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 HELLO
 WORLD
@@ -39,7 +39,7 @@ RUN
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 10 PRINT "ONE"
 20 PRINT "TWO"
@@ -65,7 +65,7 @@ LIST
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 10 PRINT "ONE"
 20 PRINT "TWO"
@@ -83,7 +83,7 @@ LIST
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 10 INPUT "A NUMBER"; N
 15 PRINT "ITS SQUARE IS";
@@ -106,7 +106,7 @@ LIST -20
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 20 B = 2
 Ok
@@ -131,7 +131,7 @@ FOR I = 1 TO 5: PRINT I * I;: NEXT I
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
  3.14159292 
 Ok
@@ -153,7 +153,7 @@ X = 5: PRINT X
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 Ok
  0 
@@ -177,7 +177,7 @@ RUN
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 TOTAL 0 
 Ok
@@ -199,7 +199,7 @@ RUN
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 ?Runtime error: Division by zero
 Ok
@@ -223,7 +223,7 @@ RUN
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 Ok
 10 PRINT "HELLO, WORLD!"
@@ -245,7 +245,7 @@ RUN
 ```
 
 ```output
-CHUK-BASIC 0.1.0 - type HELP for help
+CHUK-BASIC 0.1.1 - type HELP for help
 Ok
 Ok
 Ok
