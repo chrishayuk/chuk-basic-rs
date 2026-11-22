@@ -16,7 +16,7 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { runTests } = require("@vscode/test-electron");
+const { downloadAndUnzipVSCode, runTests } = require("@vscode/test-electron");
 
 const extension = path.join(__dirname, "..");
 const repo = path.join(extension, "..", "..");
@@ -47,16 +47,30 @@ async function main() {
       "update.mode": "none",
     }),
   );
+  // The system's own folders and nothing else. On Windows a terminal cannot
+  // start without them.
+  const root = process.env.SystemRoot || "C:\\Windows";
+  const barePath = process.platform === "win32" ? `${root}\\System32;${root}` : "/usr/bin:/bin";
+  // A downloaded VS Code: newer macOS builds name the program Code, not Electron.
+  let executable = installed;
+  if (!executable) {
+    executable = await downloadAndUnzipVSCode();
+    if (!fs.existsSync(executable)) {
+      const folder = path.dirname(executable);
+      const other = fs.readdirSync(folder).find((name) => !name.includes("Helper"));
+      executable = path.join(folder, other);
+    }
+  }
   try {
     await runTests({
-      ...(installed ? { vscodeExecutablePath: installed } : {}),
+      vscodeExecutablePath: executable,
       extensionDevelopmentPath: extension,
       extensionTestsPath: path.join(__dirname, "vscode", "index.js"),
       // no chuk-basic can be found by name either: the built-in run must not lean on one
       extensionTestsEnv: {
         CHUK_BASIC_REPO: repo,
         CHUK_BASIC_SERVER: server,
-        PATH: server ? process.env.PATH : "/usr/bin:/bin",
+        PATH: server ? process.env.PATH : barePath,
       },
       launchArgs: [
         path.join(repo, "samples", "dartmouth"),
