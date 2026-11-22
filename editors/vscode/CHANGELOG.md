@@ -3,6 +3,8 @@
 ## 0.1.3
 
 - Licensed under Apache 2.0, as the repository now is. The 0.1.2 file was built just before the change and still carried the MIT text.
+- Run Program works on Windows with the interpreter the extension carries. It did not start there: the extension now runs it in a terminal of its own, on every system.
+- Stopping a program with Ctrl+C reports status 130.
 - Tested in a real VS Code on Linux and Windows as well as macOS.
 
 ## 0.1.2

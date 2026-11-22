@@ -206,6 +206,41 @@ check("Run Program runs the file in a terminal, and reports how it ended", async
   return `${which}: example1.bas exit 0; example2.bas, as a later BASIC, exit 1`;
 });
 
+check("a program's INPUT is answered by typing in the terminal", async () => {
+  // The program ends normally only if it is given 7 and then 35: a wrong or
+  // missing answer divides by zero, which the task reports as status 1.
+  const fs = require("node:fs");
+  const os = require("node:os");
+  const path = require("node:path");
+  const folder = fs.mkdtempSync(path.join(os.tmpdir(), "chuk-basic-input-"));
+  const file = path.join(folder, "ask.bas");
+  fs.writeFileSync(file, '10 INPUT "FIRST"; A\n20 INPUT "SECOND"; B\n30 IF A = 7 THEN IF B = 35 THEN 60\n40 PRINT 1 / 0\n60 PRINT "BOTH ARRIVED"\n70 END\n');
+  const play = async (answers) => {
+    await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(file));
+    const ended = new Promise((resolve, reject) => {
+      const timer = setTimeout(() => reject(new Error("ask.bas did not finish")), 30000);
+      const listener = vscode.tasks.onDidEndTaskProcess((event) => {
+        if (event.execution.task.name !== "Run ask.bas") return;
+        clearTimeout(timer);
+        listener.dispose();
+        resolve(event.exitCode);
+      });
+    });
+    await vscode.commands.executeCommand("chukBasic.run");
+    for (const answer of answers) {
+      // time for the prompt, then the keys a person would press
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await vscode.commands.executeCommand("workbench.action.terminal.focus");
+      await vscode.commands.executeCommand("workbench.action.terminal.sendSequence", { text: `${answer}\r` });
+    }
+    return ended;
+  };
+  assert.equal(await play(["7", "35"]), 0, "the right answers, typed, end the program normally");
+  assert.equal(await play(["7", "36"]), 1, "a different answer takes the other branch");
+  fs.rmSync(folder, { recursive: true, force: true });
+  return "typed 7 and 35: ended normally; typed 7 and 36: stopped with an error, as written";
+});
+
 exports.run = async function run() {
   let failed = 0;
   for (const { name, body } of checks) {
