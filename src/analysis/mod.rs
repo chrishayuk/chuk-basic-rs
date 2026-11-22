@@ -11,12 +11,14 @@ mod navigate;
 mod original;
 mod renumber;
 mod scan;
+mod tokens;
 
 pub use diagnostics::{diagnostics, Diagnostic, Severity};
 pub use docs::hover;
 pub use navigate::{definition, references, symbols, Symbol, SymbolKind};
 pub use renumber::{renumber, renumbered, Edit};
 pub use scan::{scan, Kind, Line, Span, Tok};
+pub use tokens::{complete, tokens, Completion, CompletionKind, TokenType};
 
 /// A place in the text: a 0-based line, and columns counted in UTF-16 code
 /// units, which is how the language server protocol counts them.

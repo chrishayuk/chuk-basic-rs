@@ -29,14 +29,8 @@ fn name_at(lines: &[Line], line: usize, column: u32) -> Option<String> {
     let tok = token_at(lines.get(line)?, column)?;
     let word = tok.word();
     let name = !word.is_empty()
-        && !super::original::is_original(word)
-        && crate::ast::Builtin::from_name(word).is_none()
-        && crate::tokenize_line(word, 1, crate::Spacing::Spaced).is_ok_and(|toks| {
-            matches!(
-                toks.first().map(|t| &t.tok),
-                Some(crate::lexer::Tok::Ident(_))
-            )
-        });
+        && !super::tokens::is_keyword(word)
+        && crate::ast::Builtin::from_name(word).is_none();
     name.then(|| word.to_string())
 }
 

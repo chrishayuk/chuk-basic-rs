@@ -20,7 +20,8 @@ web/serve.sh                      # http://localhost:8000  (web/serve.sh 9000 fo
 server will do. Opening `index.html` from `file://` will not work: browsers
 refuse to load module scripts and wasm from there.
 
-`chuk-basic.wasm` is **not committed** (it is in `web/.gitignore`). To publish
+`chuk-basic.wasm` is built without the compiler and with the editor tools, so
+the one file both runs programs and serves `lsp-worker.js`. It is **not committed** (it is in `web/.gitignore`). To publish
 the playground, run `web/build.sh` and upload the contents of `web/`.
 `build.sh` also rebuilds `examples/` from `samples/`.
 
@@ -32,6 +33,7 @@ the playground, run `web/build.sh` and upload the contents of `web/`.
 | `wasi.js` | a small WASI preview 1 host: arguments, an in-memory file system holding the program, captured stdout/stderr, stdin from a list of lines. No DOM, so it also runs under node |
 | `session.js` | `runProgram` (one run, with a status) and `Session` (the re-run trick below). Shared by the page and the tests |
 | `worker.js` | runs `runProgram` off the main thread |
+| `lsp-worker.js` | the language server in the page: one short run of `chuk-basic.wasm --lsp` per question (open this text, answer these requests), for an editor's colours, problems, hover and completion |
 | `examples/` | programs for the drop-down and `index.json` listing them, written by `build-examples.mjs` from `samples/` and `featured.json` |
 | `test.mjs` | tests, under node |
 | `build.sh`, `serve.sh` | as above |

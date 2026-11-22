@@ -222,6 +222,36 @@ fn hover_definition_references_and_outline() {
         Some("100 (subroutine)")
     );
 
+    // colours: the first token is the line number 10, a label, the eighth kind in the legend
+    let tokens = editor.request(
+        "textDocument/semanticTokens/full",
+        &format!(r#"{{"textDocument":{{"uri":"{URI}"}}}}"#),
+    );
+    let Json::Arr(data) = tokens.get("result").get("data") else {
+        panic!("token data")
+    };
+    let first: Vec<_> = data.iter().take(10).map(|n| n.as_u32().unwrap()).collect();
+    assert_eq!(
+        first,
+        [0, 0, 2, 7, 0, 0, 3, 3, 5, 0],
+        "10 is a label, LET a keyword"
+    );
+    assert_eq!(data.len() % 5, 0);
+
+    // after GOSUB, the lines of the program
+    let Json::Arr(items) = editor.at("textDocument/completion", 1, 9) else {
+        panic!("completion items")
+    };
+    let labels: Vec<_> = items
+        .iter()
+        .map(|i| i.get("label").as_str().unwrap())
+        .collect();
+    assert_eq!(labels, ["10", "20", "30", "40", "100", "110"]);
+    assert_eq!(
+        items[4].get("detail").as_str(),
+        Some("LET X = SQR(X↑2 + 1)")
+    );
+
     // a request it does not serve is answered, not ignored
     let reply = editor.request("textDocument/formatting", "{}");
     assert_eq!(reply.get("error").get("code"), &Json::Num(-32601.0));

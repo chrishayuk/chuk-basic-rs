@@ -6,8 +6,10 @@
 set -eu
 cd "$(dirname "$0")/.."
 
-# the page only interprets, so the compiler (and the runtime it embeds) is left out
-cargo build --release --target wasm32-wasip1 --no-default-features
+# The page interprets and, for its editor, asks the language server; it does
+# not compile. So the compiler (and the runtime it embeds) is left out, and
+# the editor tools (`--lsp`) are kept: one file serves both.
+cargo build --release --target wasm32-wasip1 --no-default-features --features editor
 cp target/wasm32-wasip1/release/chuk-basic.wasm web/chuk-basic.wasm
 
 node web/build-examples.mjs

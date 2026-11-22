@@ -12,6 +12,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { Session, localRunner, runProgram, transcriptText } from "./session.js";
+import { ask } from "./lsp-worker.js";
 
 const web = dirname(fileURLToPath(import.meta.url));
 const root = join(web, "..");
@@ -175,6 +176,47 @@ await test("the 1964 manual's quadratic example needs Dartmouth arithmetic", () 
   assert.equal(later.message, "Runtime error in line 40: Illegal function call: SQR");
   const dartmouth = runProgram(module, { source, seed: 1, dialect: "dartmouth" });
   assert.ok(transcriptText(dartmouth).includes("IMAGINARY PART= 1.41421 \n"));
+});
+
+// 5. the language server, as the page's editor asks it
+await test("the language server answers in the page's WASI: problems, colours, hover, completion", () => {
+  const text = "10 LET X = 3\n20 GOSUB 100\n30 IF X > 4 THEN 15\n40 END\n100 LET X = SQR(X\u21912 + 1)\n110 RETURN\n";
+  const at = (line, character) => ({ position: { line, character } });
+  const answer = ask(module, {
+    text,
+    requests: [
+      { method: "textDocument/semanticTokens/full" },
+      { method: "textDocument/hover", params: at(4, 13) },
+      { method: "textDocument/completion", params: at(1, 9) },
+      { method: "textDocument/definition", params: at(1, 10) },
+    ],
+  });
+  assert.deepEqual(
+    answer.diagnostics.map((d) => [d.range.start.line, d.range.start.character, d.message]),
+    [[2, 17, "There is no line 15"]],
+  );
+  const [tokens, hover, completion, definition] = answer.results;
+  assert.deepEqual(tokens.data.slice(0, 10), [0, 0, 2, 7, 0, 0, 3, 3, 5, 0]);
+  assert.match(hover.contents.value, /absolute value/);
+  assert.deepEqual(completion.map((item) => item.label), ["10", "20", "30", "40", "100", "110"]);
+  assert.equal(definition.range.start.line, 4);
+});
+
+await test("asked for 1964, the language server warns about what 1964 lacked", () => {
+  const text = "10 INPUT N\n20 PRINT N\n30 END\n";
+  assert.deepEqual(ask(module, { text }).diagnostics, []);
+  const found = ask(module, { text, dialect: "dartmouth" }).diagnostics;
+  assert.deepEqual(found.map((d) => [d.severity, d.message]), [[2, "INPUT is not one of the fifteen statements of 1964 BASIC"]]);
+});
+
+await test("the language server is quick enough to ask on every keystroke", () => {
+  const text = read(sample("games/superstartrek.bas"));
+  const started = Date.now();
+  const answer = ask(module, { text, requests: [{ method: "textDocument/semanticTokens/full" }] });
+  const took = Date.now() - started;
+  console.log(`     (Super Star Trek, ${text.split("\n").length} lines: ${took} ms, ${answer.results[0].data.length / 5} tokens)`);
+  assert.deepEqual(answer.diagnostics, []);
+  assert.ok(took < 1500, `${took} ms`);
 });
 
 // the bundled examples

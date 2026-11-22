@@ -22,7 +22,7 @@ if (!to) {
 }
 mkdirSync(join(to, "scans"), { recursive: true });
 
-for (const file of ["chuk-basic.wasm", "wasi.js", "session.js", "worker.js"]) {
+for (const file of ["chuk-basic.wasm", "wasi.js", "session.js", "worker.js", "lsp-worker.js"]) {
   copyFileSync(join(here, file), join(to, file));
 }
 
@@ -40,4 +40,4 @@ const examples = index.map(({ file, ...rest }) => {
 writeFileSync(join(to, "examples.json"), JSON.stringify(examples));
 for (const page of pages) copyFileSync(join(scans, page), join(to, "scans", page));
 
-console.log(`${to}: wasm, wasi.js, session.js, worker.js, examples.json (${examples.length} programs), ${pages.size} manual pages`);
+console.log(`${to}: wasm, wasi.js, session.js, worker.js, lsp-worker.js, examples.json (${examples.length} programs), ${pages.size} manual pages`);

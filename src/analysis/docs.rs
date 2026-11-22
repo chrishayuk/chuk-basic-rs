@@ -4,7 +4,7 @@ use super::scan::{scan, Kind};
 use super::{line_numbered, line_refs, original, token_at};
 
 /// (word, how it is written, what it does)
-const WORDS: [(&str, &str, &str); 52] = [
+pub(super) const WORDS: [(&str, &str, &str); 52] = [
     ("LET", "LET X = formula", "Works out the formula and keeps the answer in the variable. Later BASICs let you leave the word out."),
     ("PRINT", "PRINT item, item; item", "Types its items. A comma moves to the next zone, a semicolon packs them together, and either at the end holds the line open."),
     ("END", "END", "Stops the program. In 1964 it had to be the last instruction."),

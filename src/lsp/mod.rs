@@ -11,7 +11,7 @@ mod json;
 use std::collections::HashMap;
 use std::io::{BufRead, Write};
 
-use crate::analysis::{self, Lint, Location, Severity, SymbolKind};
+use crate::analysis::{self, CompletionKind, Lint, Location, Severity, SymbolKind, TokenType};
 pub use json::Json;
 
 /// The command an editor sends to renumber a file; its argument is the
@@ -148,6 +148,28 @@ impl Server<'_> {
                     ("definitionProvider", Json::Bool(true)),
                     ("referencesProvider", Json::Bool(true)),
                     ("documentSymbolProvider", Json::Bool(true)),
+                    ("completionProvider", Json::obj([])),
+                    (
+                        "semanticTokensProvider",
+                        Json::obj([
+                            (
+                                "legend",
+                                Json::obj([
+                                    (
+                                        "tokenTypes",
+                                        Json::Arr(
+                                            TokenType::NAMES
+                                                .iter()
+                                                .map(|name| Json::str(*name))
+                                                .collect(),
+                                        ),
+                                    ),
+                                    ("tokenModifiers", Json::Arr(vec![])),
+                                ]),
+                            ),
+                            ("full", Json::Bool(true)),
+                        ]),
+                    ),
                     (
                         "executeCommandProvider",
                         Json::obj([("commands", Json::Arr(vec![Json::str(RENUMBER)]))]),
@@ -245,6 +267,57 @@ impl Server<'_> {
                     _ => Vec::new(),
                 };
                 self.reply(message, Json::Arr(found.into_iter().map(here).collect()));
+            }
+            "textDocument/semanticTokens/full" => {
+                // five numbers a token: lines and columns since the one before,
+                // its length, its type's place in the legend, and no modifiers
+                let mut data = Vec::new();
+                let (mut last_line, mut last_start) = (0, 0);
+                for (line, span, kind) in text.as_deref().map(analysis::tokens).unwrap_or_default()
+                {
+                    let start = if line == last_line {
+                        span.start - last_start
+                    } else {
+                        span.start
+                    };
+                    let numbers = [
+                        (line - last_line) as u32,
+                        start,
+                        span.end - span.start,
+                        kind as u32,
+                        0,
+                    ];
+                    data.extend(numbers.into_iter().map(Json::num));
+                    (last_line, last_start) = (line, span.start);
+                }
+                self.reply(message, Json::obj([("data", Json::Arr(data))]));
+            }
+            "textDocument/completion" => {
+                let found = match (&text, place) {
+                    (Some(text), (Some(line), Some(column))) => {
+                        analysis::complete(text, line, column, self.lint)
+                    }
+                    _ => Vec::new(),
+                };
+                let items = found
+                    .into_iter()
+                    .map(|item| {
+                        // the protocol's numbers for Keyword, Function, Variable and Reference
+                        let kind = match item.kind {
+                            CompletionKind::Keyword => 14,
+                            CompletionKind::Function => 3,
+                            CompletionKind::Variable => 6,
+                            CompletionKind::Line => 18,
+                        };
+                        Json::obj([
+                            ("label", Json::str(item.label)),
+                            ("kind", Json::num(kind)),
+                            ("detail", Json::str(item.detail)),
+                            ("documentation", Json::str(item.documentation)),
+                        ])
+                    })
+                    .collect();
+                self.reply(message, Json::Arr(items));
             }
             "textDocument/documentSymbol" => {
                 let symbols = text.as_deref().map(analysis::symbols).unwrap_or_default();
