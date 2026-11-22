@@ -421,6 +421,11 @@ fn print_using() {
         "ADA IS 36 YEARS\n"
     );
     assert_eq!(run("10 PRINT USING \"##\";123"), "%123\n");
+    // a half rounds up, as in GW-BASIC (checked with PC-BASIC)
+    assert_eq!(run("10 PRINT USING \"###.##\";.125"), "  0.13\n");
+    assert_eq!(run("10 PRINT USING \"###.#\";.25"), "  0.3\n");
+    assert_eq!(run("10 PRINT USING \"##.##\";2.675"), " 2.68\n");
+    assert_eq!(run("10 PRINT USING \"##.##\";1.004;9.999"), " 1.0010.00\n");
     assert_eq!(
         run("10 PRINT USING \"## \";1;2;3;\n20 PRINT \"|\""),
         " 1  2  3 |\n"
@@ -551,4 +556,15 @@ fn syntax_errors_are_reported_before_anything_runs() {
     let err = result.unwrap_err();
     assert_eq!((err.kind, err.line), (ErrorKind::Syntax, Some(20)));
     assert_eq!(output, "");
+}
+
+/// GW-BASIC stops with "Illegal function call" here (checked with PC-BASIC).
+#[test]
+fn a_negative_number_to_a_fractional_power_is_an_error() {
+    assert_eq!(run("10 PRINT (-8)^3;(-8)^-1;0^.5"), "-512 -.125  0 \n");
+    let error = run_err("10 PRINT (-8)^(1/3)");
+    assert_eq!(
+        error.to_string(),
+        "Runtime error in line 10: Illegal function call: ^"
+    );
 }

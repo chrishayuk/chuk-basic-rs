@@ -235,7 +235,7 @@ fn number(p: &Picture, n: f64) -> String {
             format!("E{sign}{:02}", exp.abs()),
         )
     } else {
-        let fixed = format!("{:.decimals$}", n.abs());
+        let fixed = fixed(n.abs(), decimals);
         let (whole, fraction) = fixed.split_once('.').unwrap_or((&fixed, ""));
         (whole.to_string(), fraction.to_string(), String::new())
     };
@@ -281,6 +281,19 @@ fn number(p: &Picture, n: f64) -> String {
     body
 }
 
+/// `x` (not negative) with `decimals` digits after the point, a half rounded
+/// up as GW-BASIC does: .125 in `#.##` is 0.13, and 2.675 is 2.68 although
+/// the nearest binary number is a little under it.
+fn fixed(x: f64, decimals: usize) -> String {
+    let scale = 10f64.powi(decimals as i32);
+    let scaled = x * scale;
+    if !scaled.is_finite() || scaled >= 1e15 {
+        return format!("{x:.decimals$}");
+    }
+    let rounded = (scaled + scaled.max(1.0) * 1e-9).round() / scale;
+    format!("{rounded:.decimals$}")
+}
+
 /// `x` as a mantissa with `lead` digits before the point and `decimals`
 /// after, and the power of ten that goes with it.
 fn scientific(x: f64, lead: usize, decimals: usize) -> (String, i32) {
@@ -289,12 +302,12 @@ fn scientific(x: f64, lead: usize, decimals: usize) -> (String, i32) {
     }
     let lead = lead as i32;
     let mut exp = x.log10().floor() as i32 - (lead - 1);
-    let mut mantissa = format!("{:.decimals$}", x / 10f64.powi(exp));
+    let mut mantissa = fixed(x / 10f64.powi(exp), decimals);
     // rounding can carry into an extra digit (9.99 -> 10.0)
     let whole = mantissa.split('.').next().unwrap_or("").len() as i32;
     if whole > lead.max(1) {
         exp += 1;
-        mantissa = format!("{:.decimals$}", x / 10f64.powi(exp));
+        mantissa = fixed(x / 10f64.powi(exp), decimals);
     }
     (mantissa, exp)
 }

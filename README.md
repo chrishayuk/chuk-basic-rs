@@ -265,7 +265,8 @@ Where the old dialects disagree, this is what chuk-basic does:
   namespaces (`A` and `A(1)` are unrelated).
 - **Numbers** are 64-bit floats. They print with up to 9 significant digits,
   a leading space or minus sign, and a trailing space: `PRINT 1/3` gives
-  ` .333333333 `.
+  ` .333333333 `. Whole numbers print in full up to 15 digits (`2^40` is
+  ` 1099511627776 `, where GW-BASIC's single precision gives `1.099512E+12`).
 - **Print zones** are 14 columns wide; `TAB` counts columns from 0.
 - **Truth** is -1 and falsehood 0. `AND`, `OR` and `NOT` work bit by bit on
   integers, as in Microsoft BASIC.

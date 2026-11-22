@@ -177,7 +177,10 @@ pub extern "C" fn rt_div(a: f64, b: f64) -> f64 {
 
 #[no_mangle]
 pub extern "C" fn rt_pow(a: f64, b: f64) -> f64 {
-    with(|rt| rt.dialect.power(a, b))
+    with(|rt| match rt.dialect.power(a, b) {
+        Some(n) => n,
+        None => rt.fail("Illegal function call: ^"),
+    })
 }
 
 #[no_mangle]

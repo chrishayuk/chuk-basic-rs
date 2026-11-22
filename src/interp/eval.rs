@@ -59,7 +59,10 @@ impl Interpreter<'_> {
                 BinOp::Mul => Value::Num(a * b),
                 BinOp::Div if b == 0.0 => return Err(self.err("Division by zero")),
                 BinOp::Div => Value::Num(a / b),
-                BinOp::Pow => Value::Num(self.dialect.power(a, b)),
+                BinOp::Pow => match self.dialect.power(a, b) {
+                    Some(n) => Value::Num(n),
+                    None => return Err(self.err("Illegal function call: ^")),
+                },
                 BinOp::Eq => truth(a == b),
                 BinOp::Ne => truth(a != b),
                 BinOp::Lt => truth(a < b),

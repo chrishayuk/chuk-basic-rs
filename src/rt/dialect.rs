@@ -51,11 +51,12 @@ impl Dialect {
         }
     }
 
-    /// `a ^ b`
-    pub fn power(self, a: f64, b: f64) -> f64 {
+    /// `a ^ b`, or `None` where that is an error: in the Microsoft BASICs,
+    /// a negative number to a power that is not whole.
+    pub fn power(self, a: f64, b: f64) -> Option<f64> {
         match self {
-            Dialect::Dartmouth => a.abs().powf(b),
-            Dialect::Microsoft => a.powf(b),
+            Dialect::Dartmouth => Some(a.abs().powf(b)),
+            Dialect::Microsoft => (a >= 0.0 || b.fract() == 0.0).then(|| a.powf(b)),
         }
     }
 }
@@ -68,8 +69,11 @@ mod tests {
     fn dartmouth_takes_absolute_values() {
         assert_eq!(Dialect::Microsoft.sqrt(-4.0), None);
         assert_eq!(Dialect::Dartmouth.sqrt(-4.0), Some(2.0));
-        assert_eq!(Dialect::Microsoft.power(-2.0, 3.0), -8.0);
-        assert_eq!(Dialect::Dartmouth.power(-2.0, 3.0), 8.0);
+        assert_eq!(Dialect::Microsoft.power(-2.0, 3.0), Some(-8.0));
+        assert_eq!(Dialect::Dartmouth.power(-2.0, 3.0), Some(8.0));
+        // GW-BASIC: "Illegal function call" for (-8)^(1/3)
+        assert_eq!(Dialect::Microsoft.power(-8.0, 1.0 / 3.0), None);
+        assert_eq!(Dialect::Dartmouth.power(-8.0, 1.0 / 3.0), Some(2.0));
         assert_eq!(Dialect::from_name("Dartmouth"), Some(Dialect::Dartmouth));
         assert_eq!(Dialect::from_name("cobol"), None);
     }
