@@ -87,6 +87,26 @@ jobs:
         working-directory: editors/vscode
         run: xvfb-run -a npm run test:vscode
 
+      - name: "Windows: the carried interpreter, run by VS Code's own program outside VS Code"
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        working-directory: editors/vscode
+        shell: bash
+        run: |
+          npx --yes @vscode/test-electron --version >/dev/null 2>&1 || true
+          node -e "require('@vscode/test-electron').downloadAndUnzipVSCode().then(p => console.log(p))" | tail -1 > code-path.txt
+          cat code-path.txt
+          ELECTRON_RUN_AS_NODE=1 timeout 60 "$(cat code-path.txt)" server/run.js ../../samples/dartmouth/example1.bas; echo "exit status $?"
+
+      - name: "Windows: Run Program with a native chuk-basic"
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        working-directory: editors/vscode
+        shell: bash
+        run: |
+          cargo build --release
+          CHUK_BASIC="$(cd ../.. && pwd -W)/target/release/chuk-basic.exe" npm run test:vscode
+
       - name: Run the extension in a real VS Code
         if: runner.os != 'Linux'
         working-directory: editors/vscode

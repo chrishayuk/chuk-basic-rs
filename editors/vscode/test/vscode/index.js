@@ -180,7 +180,13 @@ check("Run Program runs the file in a terminal, and reports how it ended", async
   // what a task's process exits with is the one thing a test can see of a terminal
   const ending = (name) =>
     new Promise((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error(`${name} did not finish`)), 30000);
+      const started = [];
+      const starting = vscode.tasks.onDidStartTaskProcess((event) => started.push(`${event.execution.task.name} started as process ${event.processId}`));
+      const timer = setTimeout(() => {
+        starting.dispose();
+        const running = vscode.tasks.taskExecutions.map((execution) => execution.task.name).join(", ");
+        reject(new Error(`${name} did not finish (${started.join("; ") || "no task process started"}; still listed: ${running || "none"})`));
+      }, 30000);
       const listener = vscode.tasks.onDidEndTaskProcess((event) => {
         if (event.execution.task.name !== `Run ${name}`) return;
         clearTimeout(timer);
