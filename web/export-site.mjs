@@ -29,7 +29,7 @@ for (const file of ["chuk-basic.wasm", "wasi.js", "session.js", "worker.js"]) {
 const index = JSON.parse(readFileSync(join(here, "examples", "index.json"), "utf8"));
 const pages = new Set(["cover.jpg", "title-page.jpg", "p04-instruction-format.jpg", "p05-formulas.jpg", "detail-sqr-absolute-value.jpg", "detail-program-2-result.jpg"]);
 const examples = index.map(({ file, ...rest }) => {
-  for (const page of [rest.scan, rest.detail]) if (page) pages.add(page);
+  for (const page of [rest.scan, ...(rest.details || [])]) if (page) pages.add(page);
   delete rest.from;
   return {
     name: file.replace(/\.bas$/, ""),

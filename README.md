@@ -322,7 +322,7 @@ the same option.
 
 The interpreter has been run side by side with
 [PC-BASIC](https://robhagemans.github.io/pcbasic/), an independent and
-careful emulation of Microsoft GW-BASIC. The 18 programs in
+careful emulation of Microsoft GW-BASIC. The 22 programs in
 `tests/conformance` - expressions, loops, strings, `PRINT` layout, `INPUT`,
 `READ`/`DATA`, arrays, functions - print byte-for-byte the same in both, and
 so do most of the classic and tutorial samples. `scripts/pcbasic-diff.py`

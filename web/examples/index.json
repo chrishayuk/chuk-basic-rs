@@ -5,9 +5,11 @@
     "input": false,
     "from": "samples/dartmouth",
     "scan": "p01-preface.jpg",
-    "detail": "detail-preface-program.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 1",
-    "prints": "5"
+    "prints": "5",
+    "details": [
+      "detail-preface-program.jpg"
+    ]
   },
   {
     "file": "example1.bas",
@@ -25,9 +27,13 @@
     "from": "samples/dartmouth",
     "dialect": "dartmouth",
     "scan": "p22-results.jpg",
-    "detail": "detail-program-2-line-40.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, pp. 21-22",
-    "prints": "IMAGINARY PART = 1.41421"
+    "prints": "IMAGINARY PART = 1.41421",
+    "details": [
+      "detail-program-2-line-40.jpg",
+      "detail-sqr-absolute-value.jpg",
+      "detail-program-2-result.jpg"
+    ]
   },
   {
     "file": "example3.bas",
