@@ -1,6 +1,6 @@
 //! User functions defined with DEF FN.
 
-use super::compile::FnBody;
+use super::lower::FnBody;
 use super::{Exit, Interpreter, MAX_FN_DEPTH};
 use crate::ast::Expr;
 use crate::error::Result;

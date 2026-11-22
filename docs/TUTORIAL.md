@@ -648,5 +648,15 @@ Some tools for finding out what is going on:
   in the 1970s. They are the best way to see what people built with nothing
   but the statements in this tutorial. Start with `hammurabi.bas` or
   `lunar.bas`.
-- The [README](../README.md) has the full list of statements and functions,
-  and explains how to run programs as WebAssembly.
+- Run `basic` with no file for the **interactive prompt**: type numbered
+  lines, then `LIST` and `RUN`, just as on a 1970s terminal. Anything typed
+  without a line number runs at once, which makes it a handy calculator:
+  `PRINT 355 / 113`.
+- There is more to the language than this tutorial covers: `WHILE` ...
+  `WEND` loops, `PRINT USING "###.##"; X` for tidy columns of figures,
+  `LINE INPUT` for a whole line of text, `INSTR` to search a string, and
+  the `MAT` statements for matrices. The [README](../README.md) lists them
+  all.
+- `basic --compile game.bas` turns a program into a WebAssembly module,
+  `game.wasm`, that runs on its own - and several times faster.
+- The [browser playground](../web/README.md) runs BASIC in a web page.

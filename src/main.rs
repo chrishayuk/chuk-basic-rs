@@ -1,9 +1,14 @@
 //! Command-line front end.
 
 use std::io::{self, LineWriter, Write};
+use std::path::Path;
 use std::process::ExitCode;
 
 use chuk_basic::{repl, ErrorKind};
+
+/// The runtime that compiled programs are linked against: the `runtime`
+/// crate built for WASI (see `scripts/build-runtime.sh`).
+const RUNTIME: &[u8] = include_bytes!("../runtime/chuk_basic_rt.wasm");
 
 const USAGE: &str = "\
 Usage: chuk-basic [OPTIONS] [FILE.bas]
@@ -13,6 +18,8 @@ Runs a BASIC program, or with no file starts the interactive prompt.
 Options:
       --tokens         Print the token stream instead of running
       --ast            Print the syntax tree as JSON instead of running
+      --compile        Compile to WebAssembly instead of running (FILE.wasm)
+  -o, --output <FILE>  Where --compile writes its output
       --seed <N>       Seed the random number generator (repeatable runs)
       --max-steps <N>  Stop with an error after N operations
       --echo           Echo INPUT lines to the output (for piped input)
@@ -21,6 +28,7 @@ Options:
 
 enum Mode {
     Run,
+    Compile,
     Tokens,
     Ast,
 }
@@ -30,6 +38,8 @@ struct Args {
     seed: Option<u64>,
     max_steps: Option<u64>,
     echo: bool,
+    /// Where `--compile` writes; by default, beside the program.
+    output: Option<String>,
     /// The program to run; `None` starts the interactive prompt.
     path: Option<String>,
 }
@@ -39,6 +49,7 @@ fn parse_args() -> Result<Option<Args>, String> {
     let mut seed = None;
     let mut max_steps = None;
     let mut echo = false;
+    let mut output = None;
     let mut path = None;
     let mut args = std::env::args().skip(1);
     while let Some(arg) = args.next() {
@@ -54,6 +65,8 @@ fn parse_args() -> Result<Option<Args>, String> {
             "--tokens" => mode = Mode::Tokens,
             "--ast" => mode = Mode::Ast,
             "--echo" => echo = true,
+            "--compile" => mode = Mode::Compile,
+            "-o" | "--output" => output = Some(args.next().ok_or("--output needs a file name")?),
             "--seed" => {
                 let value = args.next().ok_or("--seed needs a value")?;
                 seed = Some(
@@ -80,6 +93,7 @@ fn parse_args() -> Result<Option<Args>, String> {
         seed,
         max_steps,
         echo,
+        output,
         path,
     }))
 }
@@ -95,7 +109,7 @@ fn run(args: &Args) -> Result<(), String> {
             };
             repl::repl(&mut io::stdin().lock(), &mut output, &options)
         }
-        (None, _) => return Err("--tokens and --ast need a program file".to_string()),
+        (None, _) => return Err("--tokens, --ast and --compile need a program file".to_string()),
         (Some(path), mode) => {
             let source = std::fs::read_to_string(path).map_err(|e| format!("{path}: {e}"))?;
             match mode {
@@ -106,6 +120,12 @@ fn run(args: &Args) -> Result<(), String> {
                 }),
                 Mode::Ast => chuk_basic::parse(&source).map(|program| {
                     let _ = writeln!(output, "{}", program.to_json());
+                }),
+                Mode::Compile => chuk_basic::wasm::compile(&source, RUNTIME).and_then(|module| {
+                    let to = args.output.clone().unwrap_or_else(|| {
+                        Path::new(path).with_extension("wasm").display().to_string()
+                    });
+                    std::fs::write(&to, module).map_err(|e| chuk_basic::Error::io(&e))
                 }),
                 Mode::Run => chuk_basic::parse(&source).and_then(|program| {
                     let mut input = io::stdin().lock();

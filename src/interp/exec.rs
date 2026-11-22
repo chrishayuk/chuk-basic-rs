@@ -2,7 +2,7 @@
 
 use std::rc::Rc;
 
-use super::compile::Op;
+use super::lower::Op;
 use super::{Exit, Flow, Interpreter};
 use crate::ast::Stmt;
 use crate::error::{AtLine, Result};
@@ -116,7 +116,7 @@ impl Interpreter<'_> {
             Stmt::LineInput { prompt, target } => self.line_input(prompt.as_deref(), target)?,
             Stmt::Mat(statement) => self.mat(statement)?,
             Stmt::End | Stmt::Stop => return Ok(Flow::Halt),
-            // removed or rewritten by `compile`
+            // removed or rewritten by `lower`
             Stmt::If { .. }
             | Stmt::Next(_)
             | Stmt::Def { .. }

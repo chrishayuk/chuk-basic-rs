@@ -25,6 +25,11 @@ impl DataPool {
         self.items.push(item);
     }
 
+    /// The items, and the (line number, index of first item) marks.
+    pub fn contents(&self) -> (&[DataItem], &[(u32, usize)]) {
+        (&self.items, &self.lines)
+    }
+
     /// `READ`: the next item, as a string or as a number.
     pub fn read(&mut self, string: bool) -> Result<Value> {
         let Some(item) = self.items.get(self.next) else {

@@ -17,6 +17,7 @@ pub mod lexer;
 pub mod parser;
 pub mod repl;
 pub mod rt;
+pub mod wasm;
 
 use std::io::{BufRead, Write};
 

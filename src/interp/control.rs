@@ -1,6 +1,6 @@
 //! Control flow: GOTO / GOSUB targets and FOR / NEXT loops.
 
-use super::compile::Op;
+use super::lower::Op;
 use super::{Flow, ForFrame, GosubFrame, Interpreter, MAX_GOSUB_DEPTH};
 use crate::ast::{Expr, Stmt};
 use crate::error::Result;

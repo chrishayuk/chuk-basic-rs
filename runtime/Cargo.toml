@@ -1,0 +1,13 @@
+[package]
+name = "chuk-basic-rt"
+version = "0.1.0"
+edition = "2021"
+description = "Runtime library that BASIC programs compiled to WebAssembly are linked against"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+chuk-basic = { path = ".." }

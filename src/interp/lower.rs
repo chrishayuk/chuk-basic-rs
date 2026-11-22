@@ -8,7 +8,7 @@ use crate::ast::{Expr, Program, Stmt};
 use crate::error::{Error, Result};
 use crate::rt::DataPool;
 
-pub(super) enum Op {
+pub(crate) enum Op {
     Stmt(Stmt),
     JumpIfFalse(Expr, usize),
     Jump(usize),
@@ -17,30 +17,30 @@ pub(super) enum Op {
     FnEnd,
 }
 
-pub(super) enum FnBody {
+pub(crate) enum FnBody {
     Expr(Expr),
     /// Index of the first op of a multi-line function.
     Block(usize),
 }
 
-pub(super) struct Func {
-    pub(super) params: Vec<String>,
-    pub(super) body: FnBody,
+pub(crate) struct Func {
+    pub(crate) params: Vec<String>,
+    pub(crate) body: FnBody,
 }
 
 #[derive(Default)]
-pub(super) struct Compiled {
-    pub(super) ops: Vec<Op>,
+pub(crate) struct Lowered {
+    pub(crate) ops: Vec<Op>,
     /// BASIC line number of each op, for error messages.
-    pub(super) op_line: Vec<Option<u32>>,
+    pub(crate) op_line: Vec<Option<u32>>,
     /// Line number -> index of the first op of that line.
-    pub(super) line_map: HashMap<u32, usize>,
-    pub(super) data: DataPool,
-    pub(super) funcs: HashMap<String, Rc<Func>>,
+    pub(crate) line_map: HashMap<u32, usize>,
+    pub(crate) data: DataPool,
+    pub(crate) funcs: HashMap<String, Rc<Func>>,
 }
 
-struct Compiler {
-    out: Compiled,
+struct Lowering {
+    out: Lowered,
     line: Option<u32>,
     /// Open multi-line DEFs: index of the jump that skips the body.
     open_defs: Vec<usize>,
@@ -48,7 +48,7 @@ struct Compiler {
     open_whiles: Vec<usize>,
 }
 
-impl Compiler {
+impl Lowering {
     fn emit(&mut self, op: Op) -> usize {
         self.out.ops.push(op);
         self.out.op_line.push(self.line);
@@ -160,9 +160,9 @@ impl Compiler {
     }
 }
 
-pub(super) fn compile(program: Program) -> Result<Compiled> {
-    let mut c = Compiler {
-        out: Compiled::default(),
+pub(crate) fn lower(program: Program) -> Result<Lowered> {
+    let mut c = Lowering {
+        out: Lowered::default(),
         line: None,
         open_defs: Vec::new(),
         open_whiles: Vec::new(),

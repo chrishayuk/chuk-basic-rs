@@ -25,8 +25,13 @@ jobs:
       - name: Lint
         run: cargo clippy --all-targets -- -D warnings
 
-      - name: Test (native)
+      - name: Rebuild the runtime library for compiled programs
+        run: scripts/build-runtime.sh
+
+      - name: Test (native; compiled programs run under wasmtime)
         run: cargo test
+        env:
+          CHUK_BASIC_REQUIRE_WASMTIME: "1"
 
       - name: Test (WASI, inside wasmtime)
         run: cargo test --target wasm32-wasip1

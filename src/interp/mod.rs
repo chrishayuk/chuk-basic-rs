@@ -7,12 +7,12 @@
 //! is empty is skipped entirely.
 
 mod builtins;
-mod compile;
 mod control;
 mod eval;
 mod exec;
 mod functions;
 mod io;
+pub(crate) mod lower;
 mod mat;
 mod vars;
 
@@ -23,7 +23,7 @@ use std::rc::Rc;
 use crate::ast::Program;
 use crate::error::{AtLine, Error, Result};
 use crate::rt::{Arrays, Console, DataPool, Rnd, Value};
-use compile::{compile, Func, Op};
+use lower::{lower, Func, Op};
 
 /// Each BASIC call nests several interpreter frames on the native stack, so
 /// this is kept well inside a 1 MiB WebAssembly stack.
@@ -91,7 +91,7 @@ impl<'a> Interpreter<'a> {
         output: &'a mut dyn Write,
         seed: Option<u64>,
     ) -> Result<Self> {
-        let c = compile(program)?;
+        let c = lower(program)?;
         Ok(Interpreter {
             ops: Rc::new(c.ops),
             op_line: c.op_line,
