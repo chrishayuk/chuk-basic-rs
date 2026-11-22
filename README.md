@@ -420,6 +420,12 @@ does write `DEF FNF(Z) = EXP(X) -2`, using `X` rather than its argument
 `Z`; it works because `X` is the variable the program is changing, and it
 is typed as printed.
 
+In November 2026 a second model, OpenAI's Codex, reviewed this repository
+independently: it built and ran everything and checked twenty places against
+the scans. What it found and what was done about each finding is in
+[`docs/independent-review.md`](docs/independent-review.md); several rows of
+the table above come from it.
+
 ### Compared with GW-BASIC
 
 The interpreter has been run side by side with
