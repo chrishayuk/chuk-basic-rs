@@ -127,6 +127,11 @@ impl<'a> Interpreter<'a> {
         self.console.set_echo(echo);
     }
 
+    /// The column the output cursor is in (0 at the start of a line).
+    pub fn column(&self) -> usize {
+        self.console.column()
+    }
+
     /// Run the program to completion.
     pub fn run(&mut self) -> Result<()> {
         let result = self.exec(0, false).map(|_| ());

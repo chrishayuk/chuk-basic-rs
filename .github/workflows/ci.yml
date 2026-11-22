@@ -33,3 +33,9 @@ jobs:
 
       - name: Native and WASI builds print the same thing
         run: scripts/wasi-check.sh
+
+      - name: Browser playground (the WASI shim and session logic, in node)
+        run: |
+          cargo build --release
+          web/build.sh
+          node web/test.mjs

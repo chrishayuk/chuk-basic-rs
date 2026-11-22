@@ -3,12 +3,12 @@
 use std::io::{self, LineWriter, Write};
 use std::process::ExitCode;
 
-use chuk_basic::ErrorKind;
+use chuk_basic::{repl, ErrorKind};
 
 const USAGE: &str = "\
-Usage: chuk-basic [OPTIONS] <FILE.bas>
+Usage: chuk-basic [OPTIONS] [FILE.bas]
 
-Runs a BASIC program.
+Runs a BASIC program, or with no file starts the interactive prompt.
 
 Options:
       --tokens         Print the token stream instead of running
@@ -30,7 +30,8 @@ struct Args {
     seed: Option<u64>,
     max_steps: Option<u64>,
     echo: bool,
-    path: String,
+    /// The program to run; `None` starts the interactive prompt.
+    path: Option<String>,
 }
 
 fn parse_args() -> Result<Option<Args>, String> {
@@ -74,7 +75,6 @@ fn parse_args() -> Result<Option<Args>, String> {
             _ => path = Some(arg),
         }
     }
-    let path = path.ok_or("No program file given")?;
     Ok(Some(Args {
         mode,
         seed,
@@ -85,25 +85,38 @@ fn parse_args() -> Result<Option<Args>, String> {
 }
 
 fn run(args: &Args) -> Result<(), String> {
-    let source = std::fs::read_to_string(&args.path).map_err(|e| format!("{}: {e}", args.path))?;
     let mut output = LineWriter::new(io::stdout().lock());
-    let result = match args.mode {
-        Mode::Tokens => chuk_basic::tokenize(&source).map(|tokens| {
-            for token in tokens {
-                let _ = writeln!(output, "{:?}", token.tok);
+    let result = match (&args.path, &args.mode) {
+        (None, Mode::Run) => {
+            let options = repl::Options {
+                seed: args.seed,
+                step_limit: args.max_steps,
+                echo: args.echo,
+            };
+            repl::repl(&mut io::stdin().lock(), &mut output, &options)
+        }
+        (None, _) => return Err("--tokens and --ast need a program file".to_string()),
+        (Some(path), mode) => {
+            let source = std::fs::read_to_string(path).map_err(|e| format!("{path}: {e}"))?;
+            match mode {
+                Mode::Tokens => chuk_basic::tokenize(&source).map(|tokens| {
+                    for token in tokens {
+                        let _ = writeln!(output, "{:?}", token.tok);
+                    }
+                }),
+                Mode::Ast => chuk_basic::parse(&source).map(|program| {
+                    let _ = writeln!(output, "{}", program.to_json());
+                }),
+                Mode::Run => chuk_basic::parse(&source).and_then(|program| {
+                    let mut input = io::stdin().lock();
+                    let mut interpreter =
+                        chuk_basic::Interpreter::new(program, &mut input, &mut output, args.seed)?;
+                    interpreter.set_step_limit(args.max_steps);
+                    interpreter.set_echo_input(args.echo);
+                    interpreter.run()
+                }),
             }
-        }),
-        Mode::Ast => chuk_basic::parse(&source).map(|program| {
-            let _ = writeln!(output, "{}", program.to_json());
-        }),
-        Mode::Run => chuk_basic::parse(&source).and_then(|program| {
-            let mut input = io::stdin().lock();
-            let mut interpreter =
-                chuk_basic::Interpreter::new(program, &mut input, &mut output, args.seed)?;
-            interpreter.set_step_limit(args.max_steps);
-            interpreter.set_echo_input(args.echo);
-            interpreter.run()
-        }),
+        }
     };
     let _ = output.flush();
     match result {

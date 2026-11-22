@@ -15,6 +15,7 @@ pub mod error;
 pub mod interp;
 pub mod lexer;
 pub mod parser;
+pub mod repl;
 pub mod rt;
 
 use std::io::{BufRead, Write};

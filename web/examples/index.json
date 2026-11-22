@@ -1,0 +1,10 @@
+[
+  { "file": "hello.bas", "title": "Hello, world", "input": false },
+  { "file": "primes.bas", "title": "Primes", "input": false },
+  { "file": "mandelbrot.bas", "title": "Mandelbrot set", "input": false },
+  { "file": "guess.bas", "title": "Guess the number", "input": true },
+  { "file": "hi-lo.bas", "title": "Hi-Lo (game)", "input": true },
+  { "file": "hammurabi.bas", "title": "Hammurabi (game)", "input": true },
+  { "file": "lunar.bas", "title": "Lunar Lander (game)", "input": true },
+  { "file": "superstartrek.bas", "title": "Super Star Trek (game)", "input": true }
+]

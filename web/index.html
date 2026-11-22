@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>chuk-basic playground</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>chuk-basic <span>playground</span></h1>
+  <div class="controls">
+    <label>Example
+      <select id="examples"><option value="">Loading...</option></select>
+    </label>
+    <label>Seed
+      <input id="seed" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="random"
+             autocomplete="off" title="Leave empty for a new random seed on every Run">
+    </label>
+    <label class="check" title="Most old programs expect answers in capitals">
+      <input id="caps" type="checkbox" checked> CAPS
+    </label>
+    <button id="run" type="button" class="primary" disabled title="Ctrl+Enter">Run</button>
+    <button id="stop" type="button" disabled>Stop</button>
+  </div>
+</header>
+
+<main>
+  <section class="pane">
+    <h2>Program</h2>
+    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+              autocorrect="off" wrap="off" aria-label="BASIC program"></textarea>
+  </section>
+
+  <section class="pane">
+    <h2>Output <span id="status" role="status" aria-live="polite">Loading the interpreter...</span></h2>
+    <div id="terminal" class="terminal">
+      <pre id="output" aria-label="Program output"></pre>
+      <form id="input-form" autocomplete="off">
+        <span class="prompt" aria-hidden="true">&gt;</span>
+        <input id="input" type="text" disabled spellcheck="false" autocomplete="off"
+               autocapitalize="characters" autocorrect="off" enterkeyhint="send"
+               aria-label="Input for the program" placeholder="">
+        <button id="send" type="submit" disabled>Enter</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  A BASIC interpreter written in Rust, running in your browser as WebAssembly + WASI.
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

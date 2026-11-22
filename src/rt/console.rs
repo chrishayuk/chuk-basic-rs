@@ -39,6 +39,11 @@ impl<'a> Console<'a> {
         self.echo = echo;
     }
 
+    /// The column the cursor is in (0 at the start of a line).
+    pub fn column(&self) -> usize {
+        self.col
+    }
+
     pub fn flush(&mut self) -> Result<()> {
         self.output.flush().map_err(|e| Error::io(&e))
     }
