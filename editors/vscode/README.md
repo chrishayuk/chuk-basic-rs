@@ -51,11 +51,11 @@ Program uses 1964's arithmetic and printing (`--dialect dartmouth`).
 
 ## Install
 
-Download `chuk-basic-0.1.1.vsix` from the
+Download `chuk-basic-0.1.2.vsix` from the
 [releases page](https://github.com/chrishayuk/chuk-basic-rs/releases), then:
 
 ```bash
-code --install-extension chuk-basic-0.1.1.vsix
+code --install-extension chuk-basic-0.1.2.vsix
 ```
 
 Or, in VS Code: Extensions, the `...` menu, Install from VSIX. Open any
@@ -69,8 +69,8 @@ rustup target add wasm32-wasip1
 git clone https://github.com/chrishayuk/chuk-basic-rs
 cd chuk-basic-rs/editors/vscode
 npm install
-npm run package                   # builds server/chuk-basic.wasm and chuk-basic-0.1.1.vsix
-code --install-extension chuk-basic-0.1.1.vsix
+npm run package                   # builds server/chuk-basic.wasm and chuk-basic-0.1.2.vsix
+code --install-extension chuk-basic-0.1.2.vsix
 ```
 
 ### Which interpreter it uses
@@ -149,7 +149,7 @@ npm install
 npm run build         # the grammar, and server/chuk-basic.wasm from the Rust source
 npm test              # grammar, built-in interpreter and language server, in node
 npm run test:vscode   # opens a real VS Code with its own empty profile and checks the lot
-npm run package       # build, then chuk-basic-0.1.1.vsix
+npm run package       # build, then chuk-basic-0.1.2.vsix
 ```
 
 The grammar is generated: edit `scripts/build-grammar.js`, not the JSON.

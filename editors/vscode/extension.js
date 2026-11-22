@@ -161,6 +161,8 @@ async function run() {
     panel: vscode.TaskPanelKind.Dedicated,
     focus: true,
     clear: true,
+    // without this the terminal first prints the whole command line
+    echo: false,
     showReuseMessage: false,
   };
   return vscode.tasks.executeTask(task);

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+
+- Completion: after `GOTO`, `GOSUB` and `THEN`, the program's lines; otherwise words that begin as typed.
+- The language server now sends semantic tokens.
+- Run Program no longer prints its own command line in the terminal before the program's output.
+
 ## 0.1.1
 
 - The hover on `SQR` names the later BASIC that was tested (GW-BASIC) instead of saying "later BASICs".

@@ -49,12 +49,12 @@ echo '10 PRINT "HELLO, WORLD!"' > hello.bas
 chuk-basic hello.bas
 ```
 
-For Visual Studio Code, download `chuk-basic-0.1.1.vsix` from the
+For Visual Studio Code, download `chuk-basic-0.1.2.vsix` from the
 [latest release](https://github.com/chrishayuk/chuk-basic-rs/releases/latest)
 and install it:
 
 ```bash
-code --install-extension chuk-basic-0.1.1.vsix
+code --install-extension chuk-basic-0.1.2.vsix
 ```
 
 Open any `.bas` file and you get highlighting, problems as you type, hover
@@ -65,7 +65,8 @@ Helix and other editors, see [`editors/README.md`](editors/README.md).
 
 Or try BASIC with nothing installed, in the
 [playground](https://chrishayuk.com/demos/basic), beside the pages of the
-1964 manual.
+1964 manual. Its program box is checked by the same language server,
+running in the page.
 
 ## Build and run
 
@@ -118,7 +119,7 @@ numbered lines to build a program, and commands to work with it.
 
 ```text
 $ chuk-basic
-CHUK-BASIC 0.1.1 - type HELP for help
+CHUK-BASIC 0.1.2 - type HELP for help
 Ok
 10 FOR I = 1 TO 3
 20   PRINT I * I;
@@ -175,7 +176,8 @@ scripts/wasi-check.sh               # every sample: native and WASI output must 
 ### In the browser
 
 [`web/`](web/README.md) is a static page - editor, output, an input line -
-that runs the WASI build with a small WASI shim written for it. It offers
+that runs the WASI build with a small WASI shim written for it. Its
+program box is coloured and checked by the language server, in the page. It offers
 142 of the sample programs, the games included, and each one that reads no
 input is checked against the native binary. No server side, no dependencies:
 
@@ -423,6 +425,8 @@ dependencies either; the JSON is in `src/lsp/json.rs`.
 | Hover | what a statement or function does and whether 1964 BASIC had it; on a jump, the line it goes to |
 | Outline | the subroutines, named by the `REM` at their head, and the `DEF FN`s |
 | Renumber | lines in tens, with every jump changed to match |
+| Colours | semantic tokens, so an editor with no BASIC grammar still colours a program; a line's number and the number a jump names are one kind |
+| Completion | after a jump, the program's lines; otherwise the words that begin as typed |
 
 Set the dialect to `dartmouth` and it also marks, as warnings, whatever the
 BASIC of 1964 did not have: `INPUT`, a missing `LET`, two instructions on a
