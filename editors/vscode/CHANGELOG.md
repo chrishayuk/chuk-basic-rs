@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.4
+
+The fixes made after an independent review of the repository (see `docs/independent-review.md` in the repository), in the interpreter and language server the extension carries:
+
+- The 1964 checks now warn about `IF ... THEN` followed by anything but a line number, a `DEF` of more than one argument, and numbers of more than nine digits.
+- Running in the Dartmouth dialect: `INT` truncates toward 0, `RND`'s argument is ignored, `-X^2` is `(-X)^2`, and running out of `DATA` ends the program without a message.
+- With a fixed seed, a bare `RANDOMIZE` no longer takes a new seed from the clock, so a run repeats exactly.
+
 ## 0.1.3
 
 - Licensed under Apache 2.0, as the repository now is. The 0.1.2 file was built just before the change and still carried the MIT text.

@@ -1,6 +1,6 @@
 [package]
 name = "chuk-basic-rt"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "Runtime library that BASIC programs compiled to WebAssembly are linked against"
 license = "Apache-2.0"

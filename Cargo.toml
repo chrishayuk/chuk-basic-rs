@@ -1,6 +1,6 @@
 [package]
 name = "chuk-basic"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "A BASIC interpreter (Dartmouth / Vintage / Microsoft flavours) that runs natively or as WebAssembly + WASI"
 license = "Apache-2.0"
