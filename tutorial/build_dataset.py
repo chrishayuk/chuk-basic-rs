@@ -574,7 +574,7 @@ qa("What does PRINT \"X IS\" X mean in BASIC, with no semicolon?",
 
 # ---------------------------------------------------------------- 1964, tools
 
-qa("What was the first BASIC program in print?",
+qa("What program does the first BASIC manual show in its preface?",
    "The preface of the first BASIC manual, Dartmouth College, May 1964, shows this "
    "program, and page 4 gives it line numbers.\n\n"
    + prog((SAMPLES / "dartmouth" / "preface.bas").read_text()))
@@ -588,9 +588,13 @@ qa("Why does SQR of a negative number work in 1964 Dartmouth BASIC?",
    + f"```\n{output('10 PRINT SQR(-16)', info='dialect=dartmouth')}\n```")
 
 qa("What does --dialect dartmouth change in chuk-basic?",
-   "Two things, both stated in the 1964 manual: `SQR` takes the absolute value of "
-   "its argument, and a power takes the absolute value of the number being "
-   "raised. Run with `--dialect dartmouth`, this program\n\n"
+   "Seven things. Three are stated in the 1964 manual: `SQR` takes the absolute "
+   "value of its argument, a power takes the absolute value of the number being "
+   "raised, and running out of DATA stops the program quietly. Numbers print as "
+   "the manual's results do: six significant digits if not whole, and a point after a whole "
+   "number. And where the manual is silent it follows Thomas Kurtz's account of "
+   "the original BASIC: `INT` truncates toward zero, `RND` ignores its argument, "
+   "and `-X^2` is `(-X)^2`. Run with `--dialect dartmouth`, this program\n\n"
    "```basic\n10 PRINT SQR(-16)\n20 PRINT (-2) ^ 3\n```\n\nprints:\n\n"
    + f"```\n{output('10 PRINT SQR(-16)' + chr(10) + '20 PRINT (-2) ^ 3', info='dialect=dartmouth')}\n```"
    + "\n\nWith the default dialect line 10 is an error and line 20 gives -8.")

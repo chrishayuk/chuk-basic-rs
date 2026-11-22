@@ -76,6 +76,7 @@ impl Gen {
                 self.num(body, operand);
                 match op {
                     UnOp::Neg => body.code.op(I::F64Neg),
+                    UnOp::NegPower => body.code.call(self.rt.rt_leading_minus),
                     UnOp::Not => body.code.call(self.rt.rt_not),
                 }
                 Ty::Num
@@ -172,9 +173,9 @@ impl Gen {
     /// Built-in functions run in the runtime, which checks the types of
     /// their arguments as the interpreter does.
     fn builtin(&mut self, body: &mut Body, builtin: Builtin, args: &[Expr]) -> Ty {
-        // the three that are single WebAssembly instructions are done in line
+        // the two that are single WebAssembly instructions are done in line
+        // (not INT, whose rounding depends on the dialect)
         let instruction = match builtin {
-            Builtin::Int => Some(I::F64Floor),
             Builtin::Fix => Some(I::F64Trunc),
             Builtin::Abs => Some(I::F64Abs),
             _ => None,

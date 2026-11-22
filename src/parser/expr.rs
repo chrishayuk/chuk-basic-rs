@@ -94,7 +94,13 @@ impl Parser {
 
     pub(super) fn unary(&mut self) -> Result<Expr> {
         if self.eat(&Tok::Minus) {
-            return Ok(Expr::Unary(UnOp::Neg, Box::new(self.unary()?)));
+            if matches!(self.peek(), Tok::Minus | Tok::Plus) {
+                return Ok(Expr::Unary(UnOp::Neg, Box::new(self.unary()?)));
+            }
+            // `-X^2`, not `-(X^2)`: the dialects disagree about it
+            let (operand, power) = self.power_written()?;
+            let op = if power { UnOp::NegPower } else { UnOp::Neg };
+            return Ok(Expr::Unary(op, Box::new(operand)));
         }
         if self.eat(&Tok::Plus) {
             return self.unary();
@@ -105,6 +111,13 @@ impl Parser {
     /// `^` binds tighter than unary minus on its left (`-2^2` is -4) but
     /// allows a signed exponent (`2^-1`).
     pub(super) fn power(&mut self) -> Result<Expr> {
+        Ok(self.power_written()?.0)
+    }
+
+    /// [`Self::power`], and whether a `^` was written at this level (as in
+    /// `X^2`, and not in `(X^2)`).
+    fn power_written(&mut self) -> Result<(Expr, bool)> {
+        let mut written = false;
         let mut left = self.primary()?;
         while self.eat(&Tok::Caret) {
             let right = if self.eat(&Tok::Minus) {
@@ -114,8 +127,9 @@ impl Parser {
                 self.primary()?
             };
             left = binary(BinOp::Pow, left, right);
+            written = true;
         }
-        Ok(left)
+        Ok((left, written))
     }
 
     pub(super) fn primary(&mut self) -> Result<Expr> {

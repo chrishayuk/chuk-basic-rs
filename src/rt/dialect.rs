@@ -11,9 +11,17 @@ pub enum Dialect {
     Microsoft,
     /// Dartmouth BASIC as its first manual (May 1964) describes it: `SQR`
     /// takes "the square-root ... of the absolute value", and `A ↑ B` "is
-    /// actually interpreted as |A|^B". Numbers are printed as in the results
-    /// on its pp. 21-23: six significant figures, and a point after a whole
-    /// number (`3.`).
+    /// actually interpreted as |A|^B" (p. 5). When `READ` finds no data left,
+    /// "the computer stops" (p. 15) - quietly, as the results on p. 22 show.
+    /// Numbers are printed as in the results on pp. 21-23: a number that is
+    /// not whole to six significant figures, and a point after a whole number
+    /// (`3.`).
+    ///
+    /// The manual leaves `INT` and `RND` to its Part II, which the reprint
+    /// does not include, and says nothing of how a leading minus binds. For
+    /// those this follows Thomas Kurtz's account of the original BASIC
+    /// (dartmouth.edu/basicfifty/commands.html): `INT` truncates toward 0,
+    /// `RND`'s argument is ignored, and `-X↑2` is `(-X)↑2`.
     Dartmouth,
 }
 
@@ -33,6 +41,41 @@ impl Dialect {
             Dialect::Dartmouth => Some(x.abs().sqrt()),
             Dialect::Microsoft => (x >= 0.0).then(|| x.sqrt()),
         }
+    }
+
+    /// `INT(x)`: the whole number below `x` in later BASICs; in Kurtz's
+    /// account of 1964 BASIC, "the integer part (truncating toward 0)".
+    pub fn int(self, x: f64) -> f64 {
+        match self {
+            Dialect::Microsoft => x.floor(),
+            Dialect::Dartmouth => x.trunc(),
+        }
+    }
+
+    /// The argument `RND(x)` is taken to have. Kurtz: in 1964 "the argument
+    /// is ignored" - every call gives the next number, `RND(0)` included.
+    pub fn rnd_argument(self, x: f64) -> f64 {
+        match self {
+            Dialect::Microsoft => x,
+            Dialect::Dartmouth => 1.0,
+        }
+    }
+
+    /// `-A ↑ B` written without brackets, given the value `v` of `A ↑ B`.
+    /// Later BASICs read it as `-(A ↑ B)`. Kurtz: in 1964 "a leading minus
+    /// sign ... has higher precedence than exponentiation", so it is
+    /// `(-A) ↑ B`, which with the absolute value in every power is `v`.
+    pub fn leading_minus(self, v: f64) -> f64 {
+        match self {
+            Dialect::Microsoft => -v,
+            Dialect::Dartmouth => v,
+        }
+    }
+
+    /// Whether `READ` with no data left ends the program normally, rather
+    /// than being an error.
+    pub fn read_past_data_ends(self) -> bool {
+        self == Dialect::Dartmouth
     }
 
     /// A number as `PRINT` shows it, without the sign column.
@@ -92,5 +135,18 @@ mod tests {
         assert_eq!(d.number(1e20), "1E+20");
         assert_eq!(Dialect::Microsoft.number(3.0), "3");
         assert_eq!(Dialect::Microsoft.number(2f64.sqrt()), "1.41421356");
+        // our choice where the pages show nothing: a whole number in full
+        assert_eq!(d.number(1234567.0), "1234567.");
+    }
+
+    #[test]
+    fn dartmouth_int_rnd_and_minus_follow_kurtz() {
+        assert_eq!(Dialect::Microsoft.int(-1.5), -2.0);
+        assert_eq!(Dialect::Dartmouth.int(-1.5), -1.0);
+        assert_eq!(Dialect::Dartmouth.int(2.7), 2.0);
+        assert_eq!(Dialect::Microsoft.rnd_argument(0.0), 0.0);
+        assert_eq!(Dialect::Dartmouth.rnd_argument(0.0), 1.0);
+        assert_eq!(Dialect::Microsoft.leading_minus(4.0), -4.0);
+        assert_eq!(Dialect::Dartmouth.leading_minus(4.0), 4.0);
     }
 }

@@ -18,6 +18,11 @@ pub enum Expr {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UnOp {
     Neg,
+    /// A minus written directly before a power, `-X ^ 2`. Later BASICs read
+    /// it as `-(X ^ 2)`, the BASIC of 1964 as `(-X) ^ 2`; which one is a
+    /// matter of dialect (`Dialect::leading_minus`), so the tree keeps it
+    /// apart from an ordinary minus.
+    NegPower,
     Not,
 }
 

@@ -67,7 +67,7 @@ pub fn call(builtin: Builtin, values: &[Value], rnd: &mut Rnd, dialect: Dialect)
                     Some(root) => root,
                     None => return args.illegal(),
                 },
-                Int => x.floor(),
+                Int => dialect.int(x),
                 Fix => x.trunc(),
                 _ if x > 0.0 => 1.0,
                 _ if x < 0.0 => -1.0,
@@ -75,7 +75,10 @@ pub fn call(builtin: Builtin, values: &[Value], rnd: &mut Rnd, dialect: Dialect)
             })
         }
         // RND with no argument is RND(1)
-        Rnd => Value::Num(rnd.rnd(if values.is_empty() { 1.0 } else { args.num(0)? })),
+        Rnd => {
+            let x = if values.is_empty() { 1.0 } else { args.num(0)? };
+            Value::Num(rnd.rnd(dialect.rnd_argument(x)))
+        }
         Val => Value::Num(val(args.str(0)?)),
         Len => Value::Num(args.str(0)?.chars().count() as f64),
         Asc => match args.str(0)?.chars().next() {

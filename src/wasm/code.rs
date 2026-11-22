@@ -26,7 +26,6 @@ pub enum Op {
     F64Ge = 0x66,
     F64Abs = 0x99,
     F64Neg = 0x9A,
-    F64Floor = 0x9C,
     F64Trunc = 0x9D,
     F64Add = 0xA0,
     F64Sub = 0xA1,

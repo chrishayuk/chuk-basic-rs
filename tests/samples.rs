@@ -190,8 +190,34 @@ fn the_1964_quadratic_example_needs_dartmouth_arithmetic() {
     assert!(
         output.contains("COMPLEX ROOTS\nREAL PART= 0.               IMAGINARY PART= 1.41421 \n")
     );
-    // it loops back for more DATA until there is none
-    assert_eq!(result.unwrap_err().message, "Out of DATA");
+    // it loops back for more DATA until there is none, and then, as p. 15
+    // says, "the computer stops" - with no error, as the results on p. 22 show
+    assert!(result.is_ok(), "{result:?}");
+    assert!(output.ends_with("IMAGINARY PART= 1.41421 \n\n"), "{output}");
+}
+
+/// Where the May 1964 manual is silent - `INT` and `RND` are left to its
+/// Part II, and it does not say how a leading minus binds - the dialect
+/// follows Thomas Kurtz's account of the original BASIC.
+#[test]
+fn dartmouth_int_rnd_and_leading_minus_follow_kurtz() {
+    let run = |dialect, source: &str| {
+        let mut output = Vec::new();
+        let program = chuk_basic::parse(source).unwrap();
+        let mut input = std::io::empty();
+        let mut interpreter =
+            chuk_basic::Interpreter::new(program, &mut input, &mut output, Some(1)).unwrap();
+        interpreter.set_dialect(dialect);
+        interpreter.run().unwrap();
+        String::from_utf8(output).unwrap()
+    };
+    use chuk_basic::Dialect::{Dartmouth, Microsoft};
+    let source = "10 PRINT INT(-1.5); -2^2; -(2^2); 3 - 2^2\n20 PRINT RND(0) = RND(0)\n30 END";
+    // Microsoft's RND(0) repeats the last number, so the two are equal: -1
+    assert_eq!(run(Microsoft, source), "-2 -4 -4 -1 \n-1 \n");
+    // Kurtz: "truncating toward 0"; "-x^2 is understood to be (-x)^2";
+    // "the argument is ignored", so two calls give two numbers
+    assert_eq!(run(Dartmouth, source), "-1.  4. -4. -1. \n 0. \n");
 }
 
 #[test]

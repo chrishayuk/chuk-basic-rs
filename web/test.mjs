@@ -190,7 +190,9 @@ await test("the 1964 manual's quadratic example needs Dartmouth arithmetic", () 
   const later = runProgram(module, { source, seed: 1 });
   assert.equal(later.message, "Runtime error in line 40: Illegal function call: SQR");
   const dartmouth = runProgram(module, { source, seed: 1, dialect: "dartmouth" });
-  assert.ok(transcriptText(dartmouth).includes("IMAGINARY PART= 1.41421 \n"));
+  assert.ok(transcriptText(dartmouth).endsWith("IMAGINARY PART= 1.41421 \n\n"));
+  // out of DATA, "the computer stops" (p. 15): no error
+  assert.equal(dartmouth.status, "done");
 });
 
 // 5. the language server, as the page's editor asks it

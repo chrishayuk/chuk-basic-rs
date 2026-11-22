@@ -339,7 +339,7 @@ fn expr(e: &Expr) -> Json {
         ),
         Expr::Unary(op, operand) => {
             let symbol = match op {
-                UnOp::Neg => "-",
+                UnOp::Neg | UnOp::NegPower => "-",
                 UnOp::Not => "NOT",
             };
             Json::node(

@@ -38,12 +38,29 @@ fn precedence() {
             Box::new(Expr::Binary(BinOp::Mul, num(2.0), num(3.0)))
         )
     );
-    // -2^2 is -(2^2)
+    // -2^2 is -(2^2), but marked: in 1964's BASIC it was (-2)^2
     assert_eq!(
         expr("-2^2"),
         Expr::Unary(
+            UnOp::NegPower,
+            Box::new(Expr::Binary(BinOp::Pow, num(2.0), num(2.0)))
+        )
+    );
+    // with brackets it is an ordinary minus in every dialect
+    assert_eq!(
+        expr("-(2^2)"),
+        Expr::Unary(
             UnOp::Neg,
             Box::new(Expr::Binary(BinOp::Pow, num(2.0), num(2.0)))
+        )
+    );
+    assert!(matches!(expr("-(2)^2"), Expr::Unary(UnOp::NegPower, _)));
+    assert_eq!(
+        expr("-2*3"),
+        Expr::Binary(
+            BinOp::Mul,
+            Box::new(Expr::Unary(UnOp::Neg, num(2.0))),
+            num(3.0)
         )
     );
     // relational binds tighter than AND/OR

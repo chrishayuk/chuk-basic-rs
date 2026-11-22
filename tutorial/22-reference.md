@@ -256,9 +256,13 @@ With no file, the interactive prompt starts.
 
 ## The Dartmouth dialect
 
-`--dialect dartmouth` follows the first manual of May 1964 in two respects:
-`SQR(X)` is the square root of the absolute value of X, and `A ^ B` is the
-absolute value of A to the power B. Chapter 17 has the details.
+`--dialect dartmouth` follows the first manual of May 1964: `SQR(X)` is
+the square root of the absolute value of X, `A ^ B` is the absolute value
+of A to the power B, running out of `DATA` ends the program quietly, and
+numbers print as the manual's results do (`3.`, `1.41421`). Where the
+manual is silent it follows Thomas Kurtz's account of the original BASIC:
+`INT` truncates toward 0, `RND` ignores its argument, and `-X^2` is
+`(-X)^2`. Chapter 17 has the details.
 
 ## Not supported
 

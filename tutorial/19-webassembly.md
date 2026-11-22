@@ -120,7 +120,7 @@ wasmtime samples/tutorial/12_random.wasm --seed 42
 | `--seed N` | the same random numbers every time |
 | `--echo` | copy answers to `INPUT` into the output |
 | `--max-steps N` | stop after N operations |
-| `--dialect dartmouth` | the arithmetic of 1964; see chapter 17 |
+| `--dialect dartmouth` | the arithmetic and printing of 1964; see chapter 17 |
 
 Input comes from the keyboard, or from a file:
 

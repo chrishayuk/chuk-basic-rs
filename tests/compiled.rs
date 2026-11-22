@@ -256,8 +256,14 @@ fn dartmouth_examples_and_dialect() {
     if !wasmtime_available() {
         return;
     }
-    for path in programs("samples/dartmouth") {
-        let source = read(&path);
+    // and where the dialects part: INT, RND(0), a leading minus, running out of DATA
+    let probe = "10 PRINT INT(-1.5); -2^2; -(2^2); RND(0) = RND(0)\n20 READ A\n30 PRINT A\n40 GOTO 20\n50 DATA 7\n60 END\n";
+    let mut sources: Vec<(String, String)> = programs("samples/dartmouth")
+        .into_iter()
+        .map(|path| (path.display().to_string(), read(&path)))
+        .collect();
+    sources.push(("the dialect probe".to_string(), probe.to_string()));
+    for (path, source) in sources {
         for dialect in ["microsoft", "dartmouth"] {
             let interpreted = {
                 let mut output = Vec::new();
@@ -274,12 +280,7 @@ fn dartmouth_examples_and_dialect() {
                 )
             };
             let compiled = run_compiled_with(&compile(&source), "", SEED, &["--dialect", dialect]);
-            assert_eq!(
-                interpreted,
-                compiled,
-                "{} with {dialect} arithmetic",
-                path.display()
-            );
+            assert_eq!(interpreted, compiled, "{path} with {dialect} arithmetic");
         }
     }
 }

@@ -55,7 +55,7 @@ runtime_functions! {
     rt_init, rt_bytes, rt_add_literal, rt_add_data, rt_data_line, rt_add_array, rt_num_base, rt_finish,
     rt_mark, rt_op, rt_fail, rt_type_mismatch, rt_end,
     rt_sget, rt_sset, rt_concat, rt_scmp,
-    rt_div, rt_pow, rt_and, rt_or, rt_not, rt_round,
+    rt_div, rt_pow, rt_leading_minus, rt_and, rt_or, rt_not, rt_round,
     rt_idx, rt_dim, rt_aget_num, rt_aget_str, rt_aset_num, rt_aset_str,
     rt_arg_num, rt_arg_str, rt_call_num, rt_call_str,
     rt_print_num, rt_print_str, rt_tab, rt_spc, rt_zone, rt_newline, rt_using,

@@ -183,6 +183,13 @@ pub extern "C" fn rt_pow(a: f64, b: f64) -> f64 {
     })
 }
 
+/// A minus written directly before a power, `-A ^ B` (see
+/// `Dialect::leading_minus`), given the value of `A ^ B`.
+#[no_mangle]
+pub extern "C" fn rt_leading_minus(v: f64) -> f64 {
+    with(|rt| rt.dialect.leading_minus(v))
+}
+
 #[no_mangle]
 pub extern "C" fn rt_and(a: f64, b: f64) -> f64 {
     ((a as i64) & (b as i64)) as f64
@@ -413,6 +420,9 @@ pub extern "C" fn rt_line_input(prompt: i32, has_prompt: i32) -> i32 {
 #[no_mangle]
 pub extern "C" fn rt_read_num() -> f64 {
     with(|rt| {
+        if rt.dialect.read_past_data_ends() && rt.data.exhausted() {
+            rt.exit(0);
+        }
         let item = rt.data.read(false);
         match rt.check(item) {
             Value::Num(n) => n,
@@ -424,6 +434,9 @@ pub extern "C" fn rt_read_num() -> f64 {
 #[no_mangle]
 pub extern "C" fn rt_read_str() -> i32 {
     with(|rt| {
+        if rt.dialect.read_past_data_ends() && rt.data.exhausted() {
+            rt.exit(0);
+        }
         let item = rt.data.read(true);
         match rt.check(item) {
             Value::Str(text) => rt.strings.temp(text),

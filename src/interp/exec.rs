@@ -96,6 +96,10 @@ impl Interpreter<'_> {
             }
             Stmt::Read(targets) => {
                 for target in targets {
+                    // 1964: "there is no data left, and the computer stops"
+                    if self.dialect.read_past_data_ends() && self.data.exhausted() {
+                        return Ok(Flow::Halt);
+                    }
                     let value = self.data.read(target.name.ends_with('$')).at(self.line)?;
                     self.assign(target, value)?;
                 }

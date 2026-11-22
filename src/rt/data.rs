@@ -30,6 +30,11 @@ impl DataPool {
         (&self.items, &self.lines)
     }
 
+    /// Whether every item has been read.
+    pub fn exhausted(&self) -> bool {
+        self.next >= self.items.len()
+    }
+
     /// `READ`: the next item, as a string or as a number.
     pub fn read(&mut self, string: bool) -> Result<Value> {
         let Some(item) = self.items.get(self.next) else {

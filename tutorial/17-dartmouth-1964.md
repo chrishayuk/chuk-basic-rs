@@ -5,7 +5,7 @@ manual, dated that month, prints a handful of complete programs together
 with their results. They are in `samples/dartmouth`, typed in from the
 scanned pages in `docs/scans`, and this chapter runs them.
 
-## The first program in print
+## The preface's program
 
 The manual's preface shows three statements, and page 4 gives them their
 line numbers.
@@ -209,22 +209,38 @@ ROOT = 2.
 
  1.            0.            2.           COMPLEX ROOTS
 REAL PART= 0.               IMAGINARY PART= 1.41421 
-
-Runtime error in line 10: Out of DATA
 ```
 
 Those are the page's figures, digit for digit: `3.` and `-1.` with a point
-after a whole number, and `1.41421`. The program then goes back to
-line 10 for a fourth equation and stops because the data has run out, which
-is how it is written.
+after a whole number, and `1.41421`. The program then goes back to line 10
+for a fourth equation and finds no data left. Page 15 says what happens
+then: "the computer stops". The page's results show no message, so with
+`--dialect dartmouth` running out of data ends the program quietly; under
+the later rules it is the error `Out of DATA`.
+
+The figures agree; the page as a whole is not reproduced. Page 22 differs
+from this output in four ways:
+
+- It prints `READ PART`, where the program on the same page says
+  `"REAL PART="`. The two sources conflict; this follows the program.
+- It has a space before each `=` (`ROOT  = 2.`, `IMAGINARY PART = 1.41421`)
+  that the program's strings do not have.
+- Its columns do not follow one zone width: the second root, `-1.`, stands
+  under the third coefficient, not in the next zone. The results look
+  retyped for the manual, so this interpreter keeps its 14-column zones.
+- It ends with `TIME: 1 SECS.`, which the 1964 system added and this
+  interpreter does not.
 
 ## What the dialect changes
 
-`--dialect dartmouth` changes three things. Two are stated in the manual:
-`SQR` takes the absolute value of its argument, and so does a power. The
-third is copied from the results the manual prints on pages 21 to 23, which
-state no rule: a number is printed to six significant digits, and a whole
-number is followed by a point.
+`--dialect dartmouth` changes seven things. Three are stated in the manual:
+`SQR` takes the absolute value of its argument, and so does a power
+(page 5), and running out of data stops the program (page 15). The fourth
+is copied from the results the manual prints on pages 21 to 23, which
+state no rule: a number that is not whole is printed to six significant
+digits, and a whole number is followed by a point. The pages print no
+whole number longer than one digit, so a long one, such as `1234567.`, is
+printed in full; that part is our choice.
 
 ```basic
 10 PRINT SQR(-16)
@@ -259,12 +275,44 @@ to a whole power:
  16 
 ```
 
+The manual leaves `INT` and `RND` to its Part II, which the reprint does
+not include, and does not say how a minus sign in front of a power binds.
+For those three the dialect follows Thomas Kurtz's account of the original
+BASIC, written in 2005
+([dartmouth.edu/basicfifty/commands.html](https://www.dartmouth.edu/basicfifty/commands.html)):
+`INT` is "the integer part (truncating toward 0)", the argument of `RND`
+"is ignored", and "-x^2 is understood to be (-x)^2".
+
+```basic
+10 PRINT INT(-1.5); -2^2; RND(0) = RND(0)
+```
+
+```output
+-2 -4 -1 
+```
+
+```basic dialect=dartmouth
+10 PRINT INT(-1.5); -2^2; RND(0) = RND(0)
+```
+
+```output
+-1.  4.  0. 
+```
+
+`RND(0) = RND(0)` is true (-1) under the later rules, where `RND(0)`
+repeats the last number, and false (0) in 1964's, where each call gives a
+new one. Brackets make the minus an ordinary one in either dialect:
+`-(2^2)` is -4.
+
 Nothing else about the language changes with the dialect.
 
 ## What 1964 BASIC did not have
 
 After `END`, page 4 of the manual says, "There are only 13 other
-operations." Much of this tutorial would have been news to its readers:
+operations": fourteen in all. Kurtz's later account lists fifteen
+statements. The two sources disagree, and the manual does not list its
+fourteen in one place; the editor's 1964 checks use Kurtz's list. Either
+way, much of this tutorial would have been news to the manual's readers:
 
 | 1964 | Later |
 | --- | --- |
@@ -276,6 +324,9 @@ operations." Much of this tutorial would have been news to its readers:
 | `LET` required | `LET` optional |
 | `DEF FNA(X)` with one parameter, on one line | Several parameters, several lines |
 
-A program that keeps to the left-hand column runs here unchanged. Programs
-1 and 3 above did, and gave the page's answers. Program 2 needed the
-arithmetic of its time.
+Programs 1 and 3 above ran here unchanged and gave the page's answers.
+Program 2 needed the arithmetic of its time. That is three programs, not a
+proof: a program that keeps to the left-hand column will usually give the
+same answers with `--dialect dartmouth`, but where the 1964 system's
+behaviour is not documented - the exact digits of its arithmetic, its
+random numbers, its layout of a printed line - it may not.

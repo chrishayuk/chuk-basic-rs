@@ -39,6 +39,7 @@ impl Interpreter<'_> {
                 let n = self.eval_num(operand)?;
                 Ok(Value::Num(match op {
                     UnOp::Neg => -n,
+                    UnOp::NegPower => self.dialect.leading_minus(n),
                     UnOp::Not => !(n as i64) as f64,
                 }))
             }
