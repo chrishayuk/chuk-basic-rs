@@ -2,8 +2,9 @@
 
 use std::io::{BufRead, Write};
 
+use super::dialect::Dialect;
 use super::fail;
-use super::format::{parse_number, signed};
+use super::format::parse_number;
 use super::value::Value;
 use crate::error::{Error, Result};
 
@@ -20,6 +21,8 @@ pub struct Console<'a> {
     col: usize,
     /// Copy each line read from the keyboard to the output.
     echo: bool,
+    /// Whose way of printing numbers to follow.
+    dialect: Dialect,
 }
 
 impl<'a> Console<'a> {
@@ -29,7 +32,13 @@ impl<'a> Console<'a> {
             output,
             col: 0,
             echo: false,
+            dialect: Dialect::default(),
         }
+    }
+
+    /// Print numbers the way another BASIC does (see [`Dialect`]).
+    pub fn set_dialect(&mut self, dialect: Dialect) {
+        self.dialect = dialect;
     }
 
     /// Copy every line that is read to the output. A terminal already shows
@@ -69,7 +78,11 @@ impl<'a> Console<'a> {
     /// front and a space after.
     pub fn print_value(&mut self, value: &Value) -> Result<()> {
         match value {
-            Value::Num(n) => self.write(&(signed(*n) + " ")),
+            Value::Num(n) => {
+                let text = self.dialect.number(*n);
+                let sign = if text.starts_with('-') { "" } else { " " };
+                self.write(&format!("{sign}{text} "))
+            }
             Value::Str(s) => self.write(s),
         }
     }

@@ -3,6 +3,7 @@
     "from": "samples/dartmouth/preface.bas",
     "group": "The 1964 manual",
     "title": "1964: the preface's program",
+    "dialect": "dartmouth",
     "scan": "p01-preface.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 1",
     "prints": "5",
@@ -14,6 +15,7 @@
     "from": "samples/dartmouth/example1.bas",
     "group": "The 1964 manual",
     "title": "1964: example 1, average of 100 logs",
+    "dialect": "dartmouth",
     "scan": "p21-examples.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 21",
     "prints": "1.5797"
@@ -36,6 +38,7 @@
     "from": "samples/dartmouth/example3.bas",
     "group": "The 1964 manual",
     "title": "1964: example 3, root of a function",
+    "dialect": "dartmouth",
     "scan": "p23-example-3.jpg",
     "credit": "First BASIC instruction manual, Dartmouth, May 1964, p. 23",
     "prints": "ROOT = .837585"

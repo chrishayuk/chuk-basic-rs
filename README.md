@@ -25,7 +25,8 @@ This is the Rust port, and completion, of the Python `chuk-basic` project,
 which had a tokenizer and a parser. No dependencies outside the standard
 library.
 
-- **New to BASIC?** Start with the [tutorial](docs/TUTORIAL.md).
+- **New to BASIC?** Start with the [tutorial](tutorial/01-introduction.md): 22
+  chapters, and every program in them is run and checked.
 - **Want something to run?** There are [150 sample programs](samples/README.md).
 - **No terminal handy?** The [browser playground](web/README.md) runs the same
   interpreter in a web page.
@@ -55,7 +56,7 @@ Options:
       --seed <N>       Seed the random number generator (repeatable runs)
       --max-steps <N>  Stop with an error after N operations
       --echo           Echo INPUT lines to the output (for piped input)
-      --dialect <NAME> Arithmetic to follow: microsoft (default) or dartmouth
+      --dialect <NAME> BASIC to follow: microsoft (default) or dartmouth
   -h, --help           Show this help
   -V, --version        Show the version
 ```
@@ -297,13 +298,13 @@ instruction manual (Dartmouth, May 1964), typed in from the
 [scanned pages](docs/scans/README.md). The manual prints their results
 too, and the tests compare ours with the page.
 
-| Program | The 1964 page prints | chuk-basic prints |
-| --- | --- | --- |
-| Preface: `LET X = (7+8)/3` | | `5` |
-| Example 1, average of 100 logs | `1.5797` | `1.57970004` |
-| Example 3, root of a function | `ROOT = .837585` | `ROOT = .837585449` |
-| Example 3 with `EXP(X) - 2` | `ROOT = .693176` | `ROOT = .69317627` |
-| Example 2, quadratic equation | `IMAGINARY PART = 1.41421` | stops: `Illegal function call: SQR` |
+| Program | The 1964 page prints | chuk-basic prints | with `--dialect dartmouth` |
+| --- | --- | --- | --- |
+| Preface: `LET X = (7+8)/3` | | `5` | `5.` |
+| Example 1, average of 100 logs | `1.5797` | `1.57970004` | `1.5797` |
+| Example 3, root of a function | `ROOT = .837585` | `ROOT = .837585449` | `ROOT = .837585` |
+| Example 3 with `EXP(X) - 2` | `ROOT = .693176` | `ROOT = .69317627` | `ROOT = .693176` |
+| Example 2, quadratic equation | `ROOTS = 3.  -1.`, `IMAGINARY PART = 1.41421` | stops: `Illegal function call: SQR` | `ROOTS = 3.  -1.`, `IMAGINARY PART= 1.41421` |
 
 Example 2 takes the square root of a negative number on line 40 and relies
 on a rule the manual states on page 5: "the square-root is always taken of
@@ -311,13 +312,21 @@ the absolute value". Every later BASIC treats that as an error, and so does
 chuk-basic unless asked otherwise:
 
 ```bash
-chuk-basic --dialect dartmouth samples/dartmouth/example2.bas   # IMAGINARY PART= 1.41421356
+chuk-basic --dialect dartmouth samples/dartmouth/example2.bas   # IMAGINARY PART= 1.41421
 ```
 
-`--dialect dartmouth` makes `SQR` and powers take the absolute value, as
-the manual describes (`A ↑ B` "is actually interpreted as |A|^B"). The
-upwards arrow is accepted for powers in any dialect. Compiled programs take
-the same option.
+`--dialect dartmouth` changes three things:
+
+- `SQR` takes the absolute value of its argument, as page 5 says.
+- So does a power: `A ↑ B` "is actually interpreted as |A|^B".
+- `PRINT` shows a number as the results on pages 21 to 23 do: six
+  significant digits, and a point after a whole number (`3.`). The
+  beginners' part of the manual states no rule for this; it is copied from
+  those pages.
+
+It does not make the interpreter refuse what later BASICs added (`INPUT`,
+strings, `ELSE`). The upwards arrow is accepted for powers in any dialect.
+Compiled programs take the same option.
 
 ### Compared with GW-BASIC
 
@@ -422,6 +431,19 @@ interpreter walks it with a program counter. The compiler turns it into one
 WebAssembly function: a loop around a jump table with a block per operation,
 so that `GOTO` - which can go anywhere - is "set the counter and go round".
 
+## Tutorial and dataset
+
+[`tutorial/`](tutorial/01-introduction.md) is a 22-chapter tutorial, from
+`PRINT "HELLO"` through strings, `PRINT USING`, `MAT`, a complete game, the
+1964 Dartmouth dialect, interactive mode and compiling to WebAssembly, to a
+reference. Every program in it is followed by its output, and
+`python3 tutorial/check_tutorial.py` runs all 230 and compares (`--wasm`
+also compiles each one and runs it in wasmtime).
+
+`tutorial/dataset/basic.jsonl` is a small chat-format training set about
+this BASIC. `python3 tutorial/build_dataset.py` rebuilds it; every output in
+an answer comes from running the program.
+
 ## Tests
 
 ```bash
@@ -435,7 +457,7 @@ cargo test
 | `tests/golden.rs` | saved transcripts: the classic and tutorial programs, eight picture-drawing games, the conformance programs (whose output PC-BASIC agrees with) and the extensions |
 | `tests/games.rs` | all 103 games parse and survive a player typing at random; Hi-Lo is beaten by binary search; Lunar Lander's free fall matches the physics worked out by hand |
 | `tests/compiled.rs` | every program compiled to WebAssembly prints what the interpreter prints (needs wasmtime) |
-| `tests/tutorial.rs` | every listing and output in the tutorial is real |
+| `tests/tutorial.rs` | every program in the tutorial's 22 chapters prints the output shown under it |
 | `tests/samples.rs` | the original samples, including a full game of Basketball |
 | `web/test.mjs` | the playground's WASI shim and session logic, and all 142 of its example programs, in node |
 

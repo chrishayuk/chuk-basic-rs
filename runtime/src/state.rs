@@ -178,6 +178,7 @@ pub fn init(numbers: usize, strings: usize) {
     let output = Box::leak(Box::new(LineWriter::new(std::io::stdout())));
     let mut console = Console::new(input, output);
     console.set_echo(options.echo);
+    console.set_dialect(options.dialect);
     let runtime = Runtime {
         console,
         rnd: Rnd::new(options.seed),

@@ -26,7 +26,7 @@ Options:
       --seed <N>       Seed the random number generator (repeatable runs)
       --max-steps <N>  Stop with an error after N operations
       --echo           Echo INPUT lines to the output (for piped input)
-      --dialect <NAME> Arithmetic to follow: microsoft (default) or dartmouth
+      --dialect <NAME> BASIC to follow: microsoft (default) or dartmouth
   -h, --help           Show this help
   -V, --version        Show the version";
 

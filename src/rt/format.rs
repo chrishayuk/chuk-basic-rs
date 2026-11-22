@@ -14,6 +14,12 @@ pub fn signed(n: f64) -> String {
 /// point, at most 9 significant digits, no leading zero (`.5`), and
 /// exponent notation for very large or very small values.
 pub fn format_number(n: f64) -> String {
+    format_digits(n, 9)
+}
+
+/// [`format_number`] with another number of significant digits for values
+/// that are not whole.
+pub fn format_digits(n: f64, digits: usize) -> String {
     if n.is_nan() {
         return "NAN".to_string();
     }
@@ -33,14 +39,14 @@ pub fn format_number(n: f64) -> String {
             s.to_string()
         }
     };
-    let sci = format!("{n:.8e}");
+    let sci = format!("{n:.*e}", digits - 1);
     let (mantissa, exponent) = sci.split_once('e').expect("exponent format");
     let exponent: i32 = exponent.parse().expect("exponent digits");
     if !(-7..15).contains(&exponent) {
         let sign = if exponent < 0 { '-' } else { '+' };
         return format!("{}E{sign}{:02}", trim(mantissa), exponent.abs());
     }
-    let decimals = (8 - exponent).max(0) as usize;
+    let decimals = (digits as i32 - 1 - exponent).max(0) as usize;
     let fixed = trim(&format!("{n:.decimals$}"));
     match fixed.strip_prefix("-0.") {
         Some(rest) => format!("-.{rest}"),

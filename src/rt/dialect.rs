@@ -1,4 +1,6 @@
-//! Where the BASICs disagree about arithmetic.
+//! Where the BASICs disagree about arithmetic and about printing numbers.
+
+use super::format::{format_digits, format_number};
 
 /// Which BASIC's arithmetic to follow.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -9,7 +11,9 @@ pub enum Dialect {
     Microsoft,
     /// Dartmouth BASIC as its first manual (May 1964) describes it: `SQR`
     /// takes "the square-root ... of the absolute value", and `A ↑ B` "is
-    /// actually interpreted as |A|^B".
+    /// actually interpreted as |A|^B". Numbers are printed as in the results
+    /// on its pp. 21-23: six significant figures, and a point after a whole
+    /// number (`3.`).
     Dartmouth,
 }
 
@@ -28,6 +32,22 @@ impl Dialect {
         match self {
             Dialect::Dartmouth => Some(x.abs().sqrt()),
             Dialect::Microsoft => (x >= 0.0).then(|| x.sqrt()),
+        }
+    }
+
+    /// A number as `PRINT` shows it, without the sign column.
+    pub fn number(self, n: f64) -> String {
+        match self {
+            Dialect::Microsoft => format_number(n),
+            Dialect::Dartmouth => {
+                let text = format_digits(n, 6);
+                let plain = text.bytes().all(|b| b.is_ascii_digit() || b == b'-');
+                if plain {
+                    text + "."
+                } else {
+                    text
+                }
+            }
         }
     }
 
@@ -52,5 +72,21 @@ mod tests {
         assert_eq!(Dialect::Dartmouth.power(-2.0, 3.0), 8.0);
         assert_eq!(Dialect::from_name("Dartmouth"), Some(Dialect::Dartmouth));
         assert_eq!(Dialect::from_name("cobol"), None);
+    }
+
+    #[test]
+    fn dartmouth_prints_as_the_1964_results_do() {
+        // p. 21: 1.5797; p. 22: 3. -1. 0. and 1.41421; p. 23: .837585 and .693176
+        let d = Dialect::Dartmouth;
+        assert_eq!(d.number(1.57970004), "1.5797");
+        assert_eq!(d.number(3.0), "3.");
+        assert_eq!(d.number(-1.0), "-1.");
+        assert_eq!(d.number(0.0), "0.");
+        assert_eq!(d.number(2f64.sqrt()), "1.41421");
+        assert_eq!(d.number(0.837585449), ".837585");
+        assert_eq!(d.number(0.69317627), ".693176");
+        assert_eq!(d.number(1e20), "1E+20");
+        assert_eq!(Dialect::Microsoft.number(3.0), "3");
+        assert_eq!(Dialect::Microsoft.number(2f64.sqrt()), "1.41421356");
     }
 }

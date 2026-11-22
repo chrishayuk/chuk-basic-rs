@@ -129,9 +129,10 @@ impl<'a> Interpreter<'a> {
         self.console.set_echo(echo);
     }
 
-    /// Follow another BASIC's arithmetic (see [`Dialect`]).
+    /// Follow another BASIC's arithmetic and printing (see [`Dialect`]).
     pub fn set_dialect(&mut self, dialect: Dialect) {
         self.dialect = dialect;
+        self.console.set_dialect(dialect);
     }
 
     /// The column the output cursor is in (0 at the start of a line).

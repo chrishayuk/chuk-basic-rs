@@ -151,6 +151,20 @@ fn the_1964_manuals_examples_print_what_the_manual_prints() {
     assert!(dartmouth("example3b", Microsoft)
         .0
         .ends_with("ROOT = .69317627 \n"));
+
+    // asked for 1964's printing, the figures are the page's
+    use chuk_basic::Dialect::Dartmouth;
+    assert_eq!(dartmouth("preface", Dartmouth).0, " 5. \n");
+    assert_eq!(
+        dartmouth("example1", Dartmouth).0,
+        "AVERAGE OF 100 LOGS\n 1.5797 \n"
+    );
+    assert!(dartmouth("example3", Dartmouth)
+        .0
+        .ends_with("ROOT = .837585 \n"));
+    assert!(dartmouth("example3b", Dartmouth)
+        .0
+        .ends_with("ROOT = .693176 \n"));
 }
 
 /// Example 2 takes the square root of a negative number at line 40 and
@@ -169,11 +183,13 @@ fn the_1964_quadratic_example_needs_dartmouth_arithmetic() {
     // the manual's page: "ROOTS = 3.  -1." / "ROOT = 2." / "IMAGINARY PART = 1.41421"
     let (output, result) = dartmouth("example2", Dartmouth);
     assert!(
-        output.contains("TWO REAL ROOTS\nROOTS = 3     -1 \n"),
+        output.contains("TWO REAL ROOTS\nROOTS = 3.    -1. \n"),
         "{output}"
     );
-    assert!(output.contains("ONE ROOT\nROOT = 2 \n"));
-    assert!(output.contains("COMPLEX ROOTS\nREAL PART= 0  IMAGINARY PART= 1.41421356 \n"));
+    assert!(output.contains("ONE ROOT\nROOT = 2. \n"));
+    assert!(
+        output.contains("COMPLEX ROOTS\nREAL PART= 0.               IMAGINARY PART= 1.41421 \n")
+    );
     // it loops back for more DATA until there is none
     assert_eq!(result.unwrap_err().message, "Out of DATA");
 }
@@ -192,7 +208,7 @@ fn dartmouth_powers_take_the_absolute_value() {
     };
     assert_eq!(
         run(chuk_basic::Dialect::Dartmouth),
-        (" 8  3 \n".to_string(), true)
+        (" 8.  3. \n".to_string(), true)
     );
     assert!(!run(chuk_basic::Dialect::Microsoft).1);
 }
