@@ -2,10 +2,17 @@
 //!
 //! The fifteen statements and ten functions are the ones Thomas Kurtz lists
 //! for "the original BASIC" (dartmouth.edu/basicfifty/commands.html); the
-//! rule for variable names and "the last instruction in any BASIC program
-//! is END" are in the May 1964 manual, pp. 4-5.
+//! May 1964 manual itself counts fourteen operations, END "and 13 other"
+//! (p. 4), and does not name them all in one place. The rule for variable
+//! names, numbers of at most nine digits and "the last instruction in any
+//! BASIC program is END" are in the manual, pp. 4-5; the form `IF F1 rel F2
+//! THEN N` on pp. 11-12; and a defined function of one argument on p. 13.
+//!
+//! These are checks of vocabulary and of a few statement forms, not a
+//! grammar of 1964 BASIC: a program they pass may still not be one that the
+//! 1964 system would have accepted.
 
-use super::scan::{Kind, Line, Span};
+use super::scan::{Kind, Line, Span, Tok};
 use crate::ast::Builtin;
 
 pub(super) const STATEMENTS: [&str; 15] = [
@@ -60,6 +67,7 @@ pub(super) fn check(lines: &[Line]) -> Vec<(usize, Span, String)> {
                 "Every instruction needs a number in 1964 BASIC".to_string(),
             ));
         }
+        forms(line, &mut found);
         let mut start = true;
         for tok in &line.toks {
             let mut say = |why: String| found.push((line.index, tok.span, why));
@@ -122,6 +130,95 @@ pub(super) fn check(lines: &[Line]) -> Vec<(usize, Span, String)> {
         }
     }
     found
+}
+
+/// The statement forms of 1964 that a list of words cannot show: `IF` with a
+/// relation and a line number after `THEN`, `DEF` with one argument, and
+/// numbers of at most nine digits.
+fn forms(line: &Line, found: &mut Vec<(usize, Span, String)>) {
+    let mut say = |span: Span, why: &str| found.push((line.index, span, why.to_string()));
+    for statement in line
+        .toks
+        .split(|tok| tok.kind == Kind::Punct && tok.text == ":")
+    {
+        match statement.first().map(Tok::word) {
+            Some("IF") => {
+                let then = statement.iter().position(|tok| tok.word() == "THEN");
+                let condition = &statement[1..then.unwrap_or(statement.len())];
+                let relation = condition
+                    .iter()
+                    .any(|tok| tok.kind == Kind::Punct && "=<>".contains(tok.text.as_str()));
+                if !relation {
+                    say(
+                        statement[0].span,
+                        "In 1964 BASIC an IF compares two formulas: IF F1 < F2 THEN N (manual, pp. 11-12)",
+                    );
+                }
+                if let Some(then) = then {
+                    // (an ELSE after the number is marked as a later word)
+                    let after = statement.get(then + 1);
+                    if !after.is_some_and(|tok| tok.kind == Kind::Num) {
+                        say(
+                            statement[then].span,
+                            "In 1964 BASIC THEN is followed by an instruction number (manual, pp. 11-12)",
+                        );
+                    }
+                }
+            }
+            Some("DEF") => {
+                let open = statement.iter().position(|tok| tok.text == "(");
+                if let Some(open) = open {
+                    let mut depth = 0;
+                    let mut commas = 0;
+                    for tok in &statement[open..] {
+                        match tok.text.as_str() {
+                            "(" => depth += 1,
+                            ")" => depth -= 1,
+                            "," if depth == 1 => commas += 1,
+                            _ => {}
+                        }
+                        if depth == 0 {
+                            break;
+                        }
+                    }
+                    if commas > 0 {
+                        say(
+                            statement[0].span,
+                            "A function of 1964 BASIC has one argument: DEF FNC(Z) = ... (manual, p. 13)",
+                        );
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    for tok in &line.toks {
+        let numbers: Vec<&str> = match tok.kind {
+            Kind::Num => vec![tok.text.as_str()],
+            Kind::Data => tok.text.split(',').map(str::trim).collect(),
+            _ => continue,
+        };
+        if numbers.iter().any(|number| too_many_digits(number)) {
+            say(
+                tok.span,
+                "A number in 1964 BASIC has at most 9 digits (manual, p. 5)",
+            );
+        }
+    }
+}
+
+/// More than nine digits before any exponent, not counting leading zeros.
+fn too_many_digits(number: &str) -> bool {
+    let mantissa = number
+        .trim_start_matches(['+', '-'])
+        .split(['E', 'e'])
+        .next()
+        .unwrap_or("");
+    if mantissa.is_empty() || !mantissa.chars().all(|c| c.is_ascii_digit() || c == '.') {
+        return false;
+    }
+    let digits = mantissa.trim_start_matches(['0', '.']);
+    digits.chars().filter(char::is_ascii_digit).count() > 9
 }
 
 fn is_variable(word: &str) -> bool {

@@ -88,3 +88,31 @@ fn the_1964_lint_knows_the_manual_from_the_rest() {
         "every 1978 listing uses something 1964 did not have"
     );
 }
+
+/// Forms of statement the 1964 manual gives, which a list of its words
+/// cannot check: `IF F1 rel F2 THEN N` (pp. 11-12), a function of one
+/// argument (p. 13), and numbers of at most nine digits (p. 5).
+#[test]
+fn the_1964_lint_checks_the_manuals_statement_forms() {
+    let messages = |source: &str| -> Vec<String> {
+        diagnostics(source, Lint::Dartmouth1964)
+            .into_iter()
+            .map(|d| d.message)
+            .collect()
+    };
+    let found = messages("10 IF 1 THEN PRINT 2\n20 DEF FNA(X,Y)=X+Y\n30 LET X=1234567890\n40 DATA 1, 12345678901\n50 END\n");
+    let has = |text: &str| found.iter().filter(|m| m.contains(text)).count();
+    assert_eq!(has("an IF compares two formulas"), 1, "{found:?}");
+    assert_eq!(
+        has("THEN is followed by an instruction number"),
+        1,
+        "{found:?}"
+    );
+    assert_eq!(has("one argument"), 1, "{found:?}");
+    assert_eq!(has("at most 9 digits"), 2, "{found:?}");
+    // the manual's own forms pass: p. 5's numbers, p. 12's IF, p. 13's DEF
+    assert_eq!(
+        messages("10 LET X = 123456789\n20 LET Y = .123456789\n30 DATA 1.23, -.2345, 1E-17, 123456E15\n40 IF SIN(X) <= Y THEN 100\n50 DEF FNC(Z) = Z↑3 + 2.7*Z\n100 END\n"),
+        Vec::<String>::new()
+    );
+}
