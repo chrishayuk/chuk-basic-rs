@@ -4,7 +4,8 @@
 Runs each program through chuk-basic and through PC-BASIC, and reports
 whether the two print the same thing:
 
-    exact           identical, byte for byte (ignoring trailing spaces)
+    exact           identical, byte for byte
+    trailing-space  identical but for spaces at the ends of lines
     wrapped-80col   identical once PC-BASIC's wrapping at 80 columns is undone
     spacing         same words and numbers, different spacing - in practice
                     TAB, which counts from 1 in GW-BASIC and from 0 here -
@@ -16,6 +17,12 @@ Setup (PC-BASIC is only needed for this script, not to build or test):
     python3 -m venv .venv && .venv/bin/pip install pcbasic
     cargo build --release
     .venv/bin/python scripts/pcbasic-diff.py tests/conformance/*.bas
+
+What is compared is standard output. From PC-BASIC's side, line endings are
+made LF, the 0xFF bytes it writes are removed, and the "Ok" prompt and blank
+lines after the program's last output are dropped; nothing else is changed.
+Neither side's error messages on standard error, nor the exit status, are
+compared.
 
 A program `name.bas` is given `name.in` as keyboard input if it exists.
 Programs that use RND cannot match (the generators differ), and GW-BASIC has
@@ -70,9 +77,12 @@ def close(ours, theirs):
 def compare(path):
     keys_file = os.path.splitext(path)[0] + ".in"
     keys = open(keys_file).read() if os.path.exists(keys_file) else ""
-    ours, theirs = lines_of(run_ours(path, keys)), lines_of(run_pcbasic(path, keys))
-    if ours == theirs:
+    ours_text, theirs_text = run_ours(path, keys), run_pcbasic(path, keys)
+    if ours_text == theirs_text:
         return "exact", []
+    ours, theirs = lines_of(ours_text), lines_of(theirs_text)
+    if ours == theirs:
+        return "trailing-space", []
     differing = []
     for number in range(max(len(ours), len(theirs))):
         a = ours[number] if number < len(ours) else "<nothing>"

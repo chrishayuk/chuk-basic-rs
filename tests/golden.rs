@@ -94,10 +94,12 @@ fn tutorial_programs() {
     check_all(beside("samples/tutorial"));
 }
 
-/// Small programs that probe one area of the language each. Their saved
-/// output was confirmed byte for byte against PC-BASIC, an independent
-/// emulation of Microsoft GW-BASIC (see `scripts/pcbasic-diff.py`), so these
-/// pin down behaviour that two implementations agree on.
+/// Small programs that probe one area of the language each. Their standard
+/// output was confirmed byte for byte against PC-BASIC 2.0.8, an independent
+/// emulation of Microsoft GW-BASIC, once PC-BASIC's line endings and closing
+/// prompt are normalised (see `scripts/pcbasic-diff.py`; error messages and
+/// exit statuses are not compared), so these pin down behaviour that two
+/// implementations agree on.
 #[test]
 fn conformance_programs() {
     check_all(beside("tests/conformance"));
