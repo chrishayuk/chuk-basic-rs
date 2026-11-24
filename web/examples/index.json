@@ -287,6 +287,12 @@
     "input": false
   },
   {
+    "file": "classic/tpk.bas",
+    "title": "THE TPK ALGORITHM OF KNUTH AND TRABB PARDO, IN 1964 BASIC",
+    "group": "Classics",
+    "input": false
+  },
+  {
     "file": "classic/weekday.bas",
     "title": "Day of the week for famous dates, by Zeller's congruence",
     "group": "Classics",

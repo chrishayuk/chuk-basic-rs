@@ -7,7 +7,7 @@
 | `samples/` | The seven programs the project started with |
 | [`samples/tutorial/`](tutorial) | The 14 programs the [tutorial](../tutorial/01-introduction.md) is built around, in order |
 | [`samples/dartmouth/`](dartmouth) | The programs printed in the first BASIC manual, May 1964 ([scans](../docs/scans/README.md)) |
-| [`samples/classic/`](classic) | 21 short programs that each show off one idea |
+| [`samples/classic/`](classic) | 22 short programs that each show off one idea |
 | [`samples/games/`](games) | The 103 programs of *BASIC Computer Games* |
 
 Beside many programs you will find:

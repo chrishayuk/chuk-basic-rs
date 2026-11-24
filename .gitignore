@@ -4,3 +4,6 @@ target/
 !runtime/chuk_basic_rt.wasm
 .DS_Store
 __pycache__/
+
+# the source documents: fetched locally, listed in sources/README.md
+sources/*/
