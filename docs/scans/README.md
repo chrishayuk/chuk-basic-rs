@@ -49,3 +49,31 @@ the layout. The README's "Readings and corrections" lists these by kind.
 The manual is the work of Dartmouth College; these pages are reproduced for
 reference and research, with their source. Check that you are comfortable
 with that before publishing this folder.
+
+## The second manual, 1 October 1964
+
+Pages from *BASIC: A Manual for BASIC, the elementary algebraic language
+designed for use with the Dartmouth Time Sharing System*, Dartmouth College
+Computation Center, 1 October 1964: the second edition, which describes what
+the May reprint leaves out. The scan used is a 64-page PDF,
+`BASIC_Oct64.pdf` (2,146,200 bytes); another scan of the same manual is at
+<https://alandix.com/wp-content/uploads/2021/07/BASIC_Oct64.pdf>. Pages are
+the manual's own numbers (the PDF page is six more). The manual permits
+"reproduction for non-commercial use ... provided due credit is given to
+Dartmouth College".
+
+| File in `dartmouth-oct1964/` | What it shows |
+| --- | --- |
+| `title-page.jpg` | The title page and its date |
+| `p09.jpg` | `X ↑ Y` "is interpreted as \|X\| ↑ Y" |
+| `p11.jpg` | The functions; `LOG` and `SQR` of the absolute value |
+| `p31.jpg` | Five zones of fifteen spaces; a number occupies one zone |
+| `p32.jpg` | A label and a number with no comma; `PRINT I,` five to a line |
+| `p33.jpg` | The table of powers: `4.` and `256`, inexact and exact |
+| `p34.jpg` | The four rules for printing numbers, and the packed `;` |
+| `p35.jpg` | The cubes, packed with `;` |
+| `p37.jpg` | Lists and tables: sales for five salesmen |
+| `p39.jpg` | `INT` ("INT(-7.8) is -7, not -8") and `RND` |
+
+Their programs are typed in as `samples/dartmouth-oct64`, and the tests
+compare what they print with these pages.

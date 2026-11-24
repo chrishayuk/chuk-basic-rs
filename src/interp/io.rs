@@ -23,7 +23,7 @@ impl Interpreter<'_> {
                     self.console.spc(n)
                 }
                 PrintItem::Comma => self.console.next_zone(),
-                PrintItem::Semi => Ok(()),
+                PrintItem::Semi => self.console.packed(),
             }
             .at(self.line)?;
         }

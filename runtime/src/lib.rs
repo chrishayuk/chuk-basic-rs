@@ -344,6 +344,14 @@ pub extern "C" fn rt_zone() {
 }
 
 #[no_mangle]
+pub extern "C" fn rt_packed() {
+    with(|rt| {
+        let done = rt.console.packed();
+        rt.check(done)
+    });
+}
+
+#[no_mangle]
 pub extern "C" fn rt_newline() {
     with(|rt| {
         let done = rt.console.newline();

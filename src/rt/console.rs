@@ -11,6 +11,11 @@ use crate::error::{Error, Result};
 /// Width of the print zones that a comma in PRINT moves between.
 pub const ZONE_WIDTH: usize = 14;
 
+/// In 1964, "the teletype line is divided into five zones of fifteen spaces
+/// each" (October 1964 manual, p. 31).
+const DARTMOUTH_ZONE: usize = 15;
+const DARTMOUTH_LINE: usize = 5 * DARTMOUTH_ZONE;
+
 /// Widest gap a single TAB or SPC may produce.
 const MAX_SPACING: f64 = 255.0;
 
@@ -23,6 +28,12 @@ pub struct Console<'a> {
     echo: bool,
     /// Whose way of printing numbers to follow.
     dialect: Dialect,
+    /// Where the last number printed began, and how many characters it
+    /// took without its sign: for a packed `;` in 1964.
+    last_number: Option<(usize, usize)>,
+    /// The cursor was put at the start of a zone by a comma, and nothing
+    /// has been printed since: a second comma moves on a whole zone.
+    at_zone_start: bool,
 }
 
 impl<'a> Console<'a> {
@@ -33,6 +44,8 @@ impl<'a> Console<'a> {
             col: 0,
             echo: false,
             dialect: Dialect::default(),
+            last_number: None,
+            at_zone_start: false,
         }
     }
 
@@ -60,6 +73,7 @@ impl<'a> Console<'a> {
     // ---- output ------------------------------------------------------------
 
     pub fn write(&mut self, text: &str) -> Result<()> {
+        self.at_zone_start = false;
         self.output
             .write_all(text.as_bytes())
             .map_err(|e| Error::io(&e))?;
@@ -80,10 +94,24 @@ impl<'a> Console<'a> {
         match value {
             Value::Num(n) => {
                 let text = self.dialect.number(*n);
+                if self.dialect == Dialect::Dartmouth {
+                    // A number starts on a multiple of three columns: after a
+                    // label, "FIRST NØ. =  2.3" and "N =    1" (pp. 32-33).
+                    self.pad_to(self.col.div_ceil(3) * 3)?;
+                    // "BASIC checks to see if there are 12 or more spaces at
+                    // the end of a line before printing a number there" (p. 34)
+                    if self.col > 0 && self.col + 12 > DARTMOUTH_LINE {
+                        self.newline()?;
+                    }
+                    self.last_number = Some((self.col, text.trim_start_matches('-').len()));
+                }
                 let sign = if text.starts_with('-') { "" } else { " " };
                 self.write(&format!("{sign}{text} "))
             }
-            Value::Str(s) => self.write(s),
+            Value::Str(s) => {
+                self.last_number = None;
+                self.write(s)
+            }
         }
     }
 
@@ -94,9 +122,51 @@ impl<'a> Console<'a> {
         Ok(())
     }
 
-    /// A comma in PRINT: move to the start of the next zone.
+    /// A comma in PRINT: move to the start of the next zone. In 1964, a
+    /// comma in the fifth zone moves to the first zone of the next line
+    /// (October 1964 manual, p. 31).
     pub fn next_zone(&mut self) -> Result<()> {
+        let number = self.last_number.take();
+        if self.dialect == Dialect::Dartmouth {
+            // "Each number occupies one zone. Each label occupies a whole
+            // number of zones" (p. 31): the next zone is the first boundary at
+            // or after the end of the label, or a zone's width after the
+            // start of the number.
+            let next = if self.at_zone_start {
+                self.col + DARTMOUTH_ZONE
+            } else {
+                let end = match number {
+                    Some((start, _)) => self.col.max(start + DARTMOUTH_ZONE),
+                    None => self.col,
+                };
+                end.div_ceil(DARTMOUTH_ZONE).max(1) * DARTMOUTH_ZONE
+            };
+            if next >= DARTMOUTH_LINE {
+                return self.newline();
+            }
+            self.pad_to(next)?;
+            self.at_zone_start = true;
+            return Ok(());
+        }
         self.pad_to((self.col / ZONE_WIDTH + 1) * ZONE_WIDTH)
+    }
+
+    /// A semicolon in PRINT. Later BASICs print the next item straight
+    /// after. In 1964 it packs numbers: "move to the beginning of the next
+    /// multiple of three characters for the next answer ... with six
+    /// characters being the minimum" (October 1964 manual, p. 34). The page
+    /// it describes (p. 35), and its counts of 11 three-digit, 8 six-digit
+    /// and 6 nine-digit numbers to a line, fit a field of the number's
+    /// digits and three more, rounded up to a multiple of three.
+    pub fn packed(&mut self) -> Result<()> {
+        if self.dialect != Dialect::Dartmouth {
+            return Ok(());
+        }
+        if let Some((start, digits)) = self.last_number.take() {
+            let width = (digits + 3).div_ceil(3) * 3;
+            self.pad_to(start + width.max(6))?;
+        }
+        Ok(())
     }
 
     /// `TAB(n)`: move right to column `n` (counting from 0); no effect if

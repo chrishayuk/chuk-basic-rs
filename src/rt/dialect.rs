@@ -9,19 +9,18 @@ pub enum Dialect {
     /// negative number is an error.
     #[default]
     Microsoft,
-    /// Dartmouth BASIC as its first manual (May 1964) describes it: `SQR`
-    /// takes "the square-root ... of the absolute value", and `A ↑ B` "is
-    /// actually interpreted as |A|^B" (p. 5). When `READ` finds no data left,
-    /// "the computer stops" (p. 15) - quietly, as the results on p. 22 show.
-    /// Numbers are printed as in the results on pp. 21-23: a number that is
-    /// not whole to six significant figures, and a point after a whole number
-    /// (`3.`).
+    /// Dartmouth BASIC as its manuals of May and October 1964 describe it.
+    /// `SQR` and `LOG` take the absolute value of their argument (October,
+    /// p. 11; May, p. 5 for `SQR`), and `A ↑ B` "is interpreted as |A| ↑ B"
+    /// (October, p. 9). When `READ` finds no data left, "the computer stops"
+    /// (May, p. 15). `INT` chops off the fractional part: "INT(-7.8) is -7,
+    /// not -8" (October, p. 39); `RND`'s argument "has no significance"
+    /// (October, p. 39). Numbers print by the four rules of October p. 34
+    /// (see [`Dialect::number`]).
     ///
-    /// The manual leaves `INT` and `RND` to its Part II, which the reprint
-    /// does not include, and says nothing of how a leading minus binds. For
-    /// those this follows Thomas Kurtz's account of the original BASIC
-    /// (dartmouth.edu/basicfifty/commands.html): `INT` truncates toward 0,
-    /// `RND`'s argument is ignored, and `-X↑2` is `(-X)↑2`.
+    /// Neither manual says how a leading minus binds; for that this follows
+    /// Thomas Kurtz's account of the original BASIC
+    /// (dartmouth.edu/basicfifty/commands.html): `-X↑2` is `(-X)↑2`.
     Dartmouth,
 }
 
@@ -43,8 +42,9 @@ impl Dialect {
         }
     }
 
-    /// `INT(x)`: the whole number below `x` in later BASICs; in Kurtz's
-    /// account of 1964 BASIC, "the integer part (truncating toward 0)".
+    /// `INT(x)`: the whole number below `x` in later BASICs; in 1964, "INT
+    /// always operates by chopping off the fractional part, whether the
+    /// number is positive or negative" (October 1964 manual, p. 39).
     pub fn int(self, x: f64) -> f64 {
         match self {
             Dialect::Microsoft => x.floor(),
@@ -52,8 +52,9 @@ impl Dialect {
         }
     }
 
-    /// The argument `RND(x)` is taken to have. Kurtz: in 1964 "the argument
-    /// is ignored" - every call gives the next number, `RND(0)` included.
+    /// The argument `RND(x)` is taken to have. In 1964 "the argument has no
+    /// significance" (October 1964 manual, p. 39): every call gives the next
+    /// number, `RND(0)` included.
     pub fn rnd_argument(self, x: f64) -> f64 {
         match self {
             Dialect::Microsoft => x,
@@ -78,19 +79,32 @@ impl Dialect {
         self == Dialect::Dartmouth
     }
 
+    /// `LOG(x)`, or `None` where that is an error. In 1964 "the argument is
+    /// made positive before applying the function" (October manual, p. 11);
+    /// `LOG(0)` is still an error (our choice: the manual does not say).
+    pub fn log(self, x: f64) -> Option<f64> {
+        match self {
+            Dialect::Dartmouth => (x != 0.0).then(|| x.abs().ln()),
+            Dialect::Microsoft => (x > 0.0).then(|| x.ln()),
+        }
+    }
+
     /// A number as `PRINT` shows it, without the sign column.
+    ///
+    /// For 1964, the rules of the October manual, p. 34: no more than six
+    /// significant digits; no trailing zeros after the point; below 0.1,
+    /// `X.XXXXX E-Y` "unless the entire significant part of the number can be
+    /// printed as a six decimal number"; and "if the number is an exact
+    /// integer, the decimal point is not printed", integers of up to nine
+    /// digits in full. So a point after a whole number (`16.`) says it is
+    /// not exact, as in the table of powers on p. 33. Numbers of 10^6 and
+    /// more that are not exact integers, and integers of ten digits or more,
+    /// are printed `X.XXXXX E+Y`: the manual shows no such number, and the
+    /// form is ours.
     pub fn number(self, n: f64) -> String {
         match self {
             Dialect::Microsoft => format_number(n),
-            Dialect::Dartmouth => {
-                let text = format_digits(n, 6);
-                let plain = text.bytes().all(|b| b.is_ascii_digit() || b == b'-');
-                if plain {
-                    text + "."
-                } else {
-                    text
-                }
-            }
+            Dialect::Dartmouth => dartmouth_number(n),
         }
     }
 
@@ -101,6 +115,45 @@ impl Dialect {
             Dialect::Dartmouth => Some(a.abs().powf(b)),
             Dialect::Microsoft => (a >= 0.0 || b.fract() == 0.0).then(|| a.powf(b)),
         }
+    }
+}
+
+/// The October 1964 rules for printing a number (see [`Dialect::number`]).
+fn dartmouth_number(n: f64) -> String {
+    if !n.is_finite() {
+        return format_digits(n, 6);
+    }
+    let e_form = |n: f64| {
+        let sci = format!("{n:.5e}");
+        let (mantissa, exponent) = sci.split_once('e').expect("exponent format");
+        let exponent: i32 = exponent.parse().expect("exponent digits");
+        let sign = if exponent < 0 { '-' } else { '+' };
+        format!("{mantissa} E{sign}{}", exponent.abs())
+    };
+    if n.fract() == 0.0 {
+        return if n.abs() < 1e9 {
+            format!("{}", n as i64)
+        } else {
+            e_form(n)
+        };
+    }
+    if n.abs() < 0.1 {
+        // printed as a decimal only if six decimals hold all of it
+        let micro = n * 1e6;
+        if (micro - micro.round()).abs() <= micro.abs() * 1e-12 {
+            return format_digits(n, 6);
+        }
+        return e_form(n);
+    }
+    let text = format_digits(n, 6);
+    if text.contains('E') || n.abs() >= 999_999.5 {
+        return e_form(n);
+    }
+    if text.contains('.') {
+        text
+    } else {
+        // not exact, but whole to six figures: the point says so
+        text + "."
     }
 }
 
@@ -122,25 +175,41 @@ mod tests {
     }
 
     #[test]
-    fn dartmouth_prints_as_the_1964_results_do() {
-        // p. 21: 1.5797; p. 22: 3. -1. 0. and 1.41421; p. 23: .837585 and .693176
+    fn dartmouth_prints_by_the_october_1964_rules() {
         let d = Dialect::Dartmouth;
+        // May, pp. 21-23, and October rules 1 and 2
         assert_eq!(d.number(1.57970004), "1.5797");
-        assert_eq!(d.number(3.0), "3.");
-        assert_eq!(d.number(-1.0), "-1.");
-        assert_eq!(d.number(0.0), "0.");
         assert_eq!(d.number(2f64.sqrt()), "1.41421");
         assert_eq!(d.number(0.837585449), ".837585");
         assert_eq!(d.number(0.69317627), ".693176");
-        assert_eq!(d.number(1e20), "1E+20");
+        // rule 4: an exact integer has no point, up to nine digits in full
+        assert_eq!(d.number(3.0), "3");
+        assert_eq!(d.number(-1.0), "-1");
+        assert_eq!(d.number(0.0), "0");
+        assert_eq!(d.number(1_000_000.0), "1000000");
+        assert_eq!(d.number(823_543.0), "823543");
+        // not exact but whole to six figures: the point says so (p. 33: 16.)
+        assert_eq!(d.number(16.000000001), "16.");
+        assert_eq!(d.number(279_935.999_999), "279936.");
+        // rule 3: .03456 is exact to six decimals; otherwise X.XXXXX E-Y
+        assert_eq!(d.number(0.03456), ".03456");
+        assert_eq!(d.number(0.0345600001), "3.45600 E-2");
+        // ours: where the manual shows nothing
+        assert_eq!(d.number(1e20), "1.00000 E+20");
+        assert_eq!(d.number(1234567.8), "1.23457 E+6");
         assert_eq!(Dialect::Microsoft.number(3.0), "3");
         assert_eq!(Dialect::Microsoft.number(2f64.sqrt()), "1.41421356");
-        // our choice where the pages show nothing: a whole number in full
-        assert_eq!(d.number(1234567.0), "1234567.");
     }
 
     #[test]
-    fn dartmouth_int_rnd_and_minus_follow_kurtz() {
+    fn dartmouth_log_takes_the_absolute_value() {
+        assert_eq!(Dialect::Dartmouth.log(-1.0), Some(0.0));
+        assert_eq!(Dialect::Dartmouth.log(0.0), None);
+        assert_eq!(Dialect::Microsoft.log(-1.0), None);
+    }
+
+    #[test]
+    fn dartmouth_int_rnd_and_minus() {
         assert_eq!(Dialect::Microsoft.int(-1.5), -2.0);
         assert_eq!(Dialect::Dartmouth.int(-1.5), -1.0);
         assert_eq!(Dialect::Dartmouth.int(2.7), 2.0);

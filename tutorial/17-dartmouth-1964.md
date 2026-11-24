@@ -3,7 +3,10 @@
 The first BASIC ran at Dartmouth College on 1 May 1964. Its instruction
 manual, dated that month, prints a handful of complete programs together
 with their results. They are in `samples/dartmouth`, typed in from the
-scanned pages in `docs/scans`, and this chapter runs them.
+scanned pages in `docs/scans`, and this chapter runs them. A second
+edition of the manual, dated 1 October 1964, describes the parts the first
+left out, among them how numbers are printed; `--dialect dartmouth`
+follows it where the two differ.
 
 ## The preface's program
 
@@ -201,46 +204,52 @@ basic --dialect dartmouth samples/dartmouth/example2.bas
 ```output
 QUADRATIC EQUATION
 
- 1.           -2.           -3.           TWO REAL ROOTS
-ROOTS = 3.    -1. 
+ 1             -2             -3             TWO REAL ROOTS
+ROOTS =   3                   -1 
 
- 1.           -4.            4.           ONE ROOT
-ROOT = 2. 
+ 1             -4              4             ONE ROOT
+ROOT = 2 
 
- 1.            0.            2.           COMPLEX ROOTS
-REAL PART= 0.               IMAGINARY PART= 1.41421 
+ 1              0              2             COMPLEX ROOTS
+REAL PART=   0                IMAGINARY PART= 1.41421 
 ```
 
-Those are the page's figures, digit for digit: `3.` and `-1.` with a point
-after a whole number, and `1.41421`. The program then goes back to line 10
+Those are the page's figures, `1.41421` digit for digit, with one
+difference: the page prints `3.`, `-1.` and `2.`, with a point. The October
+manual explains the point (page 34): "If the number is an exact integer,
+the decimal point is not printed". A point after a whole number means the
+figure only rounds to a whole number. The 1964 square root of 16 was not
+exactly 4; this interpreter's is, so it prints `3`, `-1` and `2`. The
+program then goes back to line 10
 for a fourth equation and finds no data left. Page 15 says what happens
 then: "the computer stops". The page's results show no message, so with
 `--dialect dartmouth` running out of data ends the program quietly; under
 the later rules it is the error `Out of DATA`.
 
-The figures agree; the page as a whole is not reproduced. Page 22 differs
-from this output in four ways:
+The figures and columns agree; the page as a whole is not reproduced.
+Page 22 differs from this output in four ways:
 
 - It prints `READ PART`, where the program on the same page says
   `"REAL PART="`. The two sources conflict; this follows the program.
 - It has a space before each `=` (`ROOT  = 2.`, `IMAGINARY PART = 1.41421`)
   that the program's strings do not have.
-- Its columns do not follow one zone width: the second root, `-1.`, stands
-  under the third coefficient, not in the next zone. The results look
-  retyped for the manual, so this interpreter keeps its 14-column zones.
+- Its spacing is not the teletype's: the page was retyped for the manual.
+  Its columns are, though. The second root, `-1.`, stands under the third
+  coefficient, not in the next zone, and so does `IMAGINARY PART`. The
+  October manual explains why (page 31): "Each number occupies one zone",
+  so after `ROOTS =` and a number the next comma skips to the third zone.
+  This output puts them there too.
 - It ends with `TIME: 1 SECS.`, which the 1964 system added and this
   interpreter does not.
 
 ## What the dialect changes
 
-`--dialect dartmouth` changes seven things. Three are stated in the manual:
+`--dialect dartmouth` follows the two 1964 manuals. From the May manual:
 `SQR` takes the absolute value of its argument, and so does a power
-(page 5), and running out of data stops the program (page 15). The fourth
-is copied from the results the manual prints on pages 21 to 23, which
-state no rule: a number that is not whole is printed to six significant
-digits, and a whole number is followed by a point. The pages print no
-whole number longer than one digit, so a long one, such as `1234567.`, is
-printed in full; that part is our choice.
+(page 5), and running out of data stops the program (page 15). The October
+manual says the same of `SQR` and powers, adds `LOG` (page 11: "the
+argument is made positive before applying the function"), and supplies
+what the May reprint leaves out.
 
 ```basic
 10 PRINT SQR(-16)
@@ -257,31 +266,42 @@ Runtime error in line 10: Illegal function call: SQR
 ```
 
 ```output
- 4. 
- 8. 
- 2. 
+ 4 
+ 8 
+ 2 
 ```
 
 Under the default rules a negative number keeps its sign when it is raised
 to a whole power:
 
 ```basic
-10 PRINT (-2) ^ 3
-20 PRINT (-2) ^ 4
+10 PRINT (-2) ^ 4
+20 PRINT (-2) ^ 3
 ```
 
 ```output
--8 
  16 
+-8 
 ```
 
-The manual leaves `INT` and `RND` to its Part II, which the reprint does
-not include, and does not say how a minus sign in front of a power binds.
-For those three the dialect follows Thomas Kurtz's account of the original
+Numbers are printed by the October manual's four rules (page 34): no more
+than six significant digits; no trailing zeros after the point; below 0.1,
+the form `3.45600 E-2` unless six decimals hold the whole number; and an
+exact integer with no point, in full up to nine digits. The line is five
+zones of fifteen columns, and a comma in the fifth zone starts a new line
+(page 31). A semicolon packs numbers: it moves "to the beginning of the
+next multiple of three characters ... with six characters being the
+minimum" (page 34), so eleven three-digit numbers fit on a line, as the
+manual's table of cubes on page 35 shows.
+
+`INT` and `RND` are on page 39. `INT` "always operates by chopping off the
+fractional part, whether the number is positive or negative": "INT(-7.8)
+is -7, not -8". `RND` requires an argument, "though the argument has no
+significance". Neither manual says how a minus sign in front of a power
+binds; for that the dialect follows Thomas Kurtz's account of the original
 BASIC, written in 2005
 ([dartmouth.edu/basicfifty/commands.html](https://www.dartmouth.edu/basicfifty/commands.html)):
-`INT` is "the integer part (truncating toward 0)", the argument of `RND`
-"is ignored", and "-x^2 is understood to be (-x)^2".
+"-x^2 is understood to be (-x)^2".
 
 ```basic
 10 PRINT INT(-1.5); -2^2; RND(0) = RND(0)
@@ -296,7 +316,7 @@ BASIC, written in 2005
 ```
 
 ```output
--1.  4.  0. 
+-1     4     0 
 ```
 
 `RND(0) = RND(0)` is true (-1) under the later rules, where `RND(0)`

@@ -348,11 +348,11 @@ and labels with the page's; the layout of the page is not reproduced.
 
 | Program | The 1964 page prints | chuk-basic prints | with `--dialect dartmouth` |
 | --- | --- | --- | --- |
-| Preface: `LET X = (7+8)/3` | | `5` | `5.` |
+| Preface: `LET X = (7+8)/3` | | `5` | `5` |
 | Example 1, average of 100 logs | `1.5797` | `1.57970004` | `1.5797` |
 | Example 3, root of a function | `ROOT = .837585` | `ROOT = .837585449` | `ROOT = .837585` |
 | Example 3 with `EXP(X) - 2` | `ROOT = .693176` | `ROOT = .69317627` | `ROOT = .693176` |
-| Example 2, quadratic equation | `ROOTS = 3.  -1.`, `IMAGINARY PART = 1.41421` | stops: `Illegal function call: SQR` | `ROOTS = 3.  -1.`, `IMAGINARY PART= 1.41421` |
+| Example 2, quadratic equation | `ROOTS = 3.  -1.`, `IMAGINARY PART = 1.41421` | stops: `Illegal function call: SQR` | `ROOTS = 3  -1`, `IMAGINARY PART= 1.41421` (see below for the points) |
 
 Example 2 takes the square root of a negative number on line 40 and relies
 on a rule the manual states on page 5: "the square-root is always taken of
@@ -363,37 +363,56 @@ chuk-basic unless asked otherwise:
 chuk-basic --dialect dartmouth samples/dartmouth/example2.bas   # IMAGINARY PART= 1.41421
 ```
 
-`--dialect dartmouth` changes seven things. From the manual:
+`--dialect dartmouth` follows two manuals: the May 1964 manual, and the
+second edition of 1 October 1964, which describes what the May reprint
+leaves out. From them:
 
-- `SQR` takes the absolute value of its argument, as page 5 says.
-- So does a power: `A ↑ B` "is actually interpreted as |A|^B".
-- When `READ` finds no data left, "the computer stops" (page 15): the
-  program ends without an error message, as the results on page 22 show.
-- `PRINT` shows a number as the results on pages 21 to 23 do: six
-  significant digits for a number that is not whole, and a point after a
-  whole number (`3.`). The beginners' part of the manual states no rule for
-  this; it is copied from those pages. They print no whole number of more
-  than one digit, so a long one is printed in full (`1234567.`), which is
-  our choice.
+- `SQR` and `LOG` take the absolute value of their argument (May p. 5;
+  October p. 11), and so does a power: `X ↑ Y` "is interpreted as |X| ↑ Y"
+  (October p. 9).
+- When `READ` finds no data left, "the computer stops" (May p. 15): the
+  program ends without an error message, as the results on May p. 22 show.
+- `INT` "always operates by chopping off the fractional part, whether the
+  number is positive or negative": "INT(-7.8) is -7, not -8" (October
+  p. 39). `RND` requires an argument, "though the argument has no
+  significance" (October p. 39), so `RND(0)` gives the next number.
+- Numbers print by the four rules of October p. 34: no more than six
+  significant digits; no trailing zeros after the point; below 0.1, the form
+  `3.45600 E-2` unless six decimals hold the whole number; and "if the
+  number is an exact integer, the decimal point is not printed", in full up
+  to nine digits. A point after a whole number (`16.` in the table of powers
+  on p. 33) means the figure only rounds to a whole number. Numbers the
+  manual shows no example of (a million and more, not whole) are printed
+  `1.23457 E+6`, which is our form.
+- The line is "five zones of fifteen spaces each" (October p. 31), and a
+  comma in the fifth zone starts a new line.
+- A semicolon packs numbers: it moves "to the beginning of the next multiple
+  of three characters ... with six characters being the minimum", and a
+  number is not started with fewer than 12 columns left (October p. 34).
+  The field is the number's digits and three more, rounded up to a multiple
+  of three; that is our reading, and it reproduces the line breaks of the
+  table of cubes on p. 35 exactly, and the page's counts of 11, 8 and 6
+  numbers to a line.
 
-The manual leaves `INT` and `RND` to its Part II, which Dartmouth's reprint
-does not include, and does not say how a leading minus binds. For these
-the dialect follows Thomas Kurtz's 2005 account of
+Neither manual says how a leading minus binds. For that the dialect follows
+Thomas Kurtz's 2005 account of
 [the original BASIC](https://www.dartmouth.edu/basicfifty/commands.html):
+"-x^2 is understood to be (-x)^2", so `-2^2` is 4. With brackets,
+`-(2^2)`, it is -4 in either dialect.
 
-- `INT` is "the integer part (truncating toward 0)": `INT(-1.5)` is -1,
-  not -2.
-- The argument of `RND` "is ignored": `RND(0)` gives the next number
-  rather than repeating the last.
-- "-x^2 is understood to be (-x)^2", so `-2^2` is 4. With brackets,
-  `-(2^2)`, it is -4 in either dialect.
+The May manual's Example 2 prints `ROOTS = 3.  -1.` and `ROOT = 2.`; this
+prints `3  -1` and `2`. By the October rule, the page's points say that
+1964's square root of 16 was not exactly 4. This interpreter's arithmetic
+is exact there, so the same figures print as exact integers. The October
+manual's own programs, with what they print, are in
+[`samples/dartmouth-oct64`](samples/dartmouth-oct64/README.md).
 
 It does not make the interpreter refuse what later BASICs added (`INPUT`,
 strings, `ELSE`). The upwards arrow is accepted for powers in any dialect.
 Compiled programs take the same option. Where the 1964 system's behaviour
-is documented nowhere - the digits of its 30-bit arithmetic, its random
-numbers, its print zones (Kurtz gives 15 columns; this keeps 14) - a 1964
-program can still print something different here.
+is documented nowhere - the digits of its arithmetic, which decide whether
+a figure is an exact integer and so whether it gets a point, and its random
+numbers - a 1964 program can still print something different here.
 
 ### Readings and corrections
 
@@ -407,11 +426,13 @@ meant; *ours* is a consequence of choices made in this reconstruction.
 | Manual p. 21, example 2, line 50 | The relation is smudged. It is typed as `IF D = 0`: of the six relations the manual allows (p. 12), only `=` gives the results printed on p. 22. | interpretation |
 | Manual p. 23, example 3, line 160 | A damaged glyph that looks like ≤, typed as `<=`. `<` would print the same for both functions. | interpretation |
 | Manual p. 22, results | Prints `READ PART`; the program on the same page says `"REAL PART="`. We follow the program. | conflict |
-| Manual p. 22, results | Spaces before `=` that the program's strings lack; columns that follow no single zone width; `TIME:` lines. Not reproduced. | ours |
+| Manual p. 22, results | Spaces before `=` that the program's strings lack, and `TIME:` lines. Not reproduced. The columns are: a number fills its zone (October p. 31). | ours |
 | Manual p. 4 and Kurtz | The manual counts fourteen operations ("13 other" and `END`); Kurtz lists fifteen statements. The 1964 checks use Kurtz's list. | conflict |
-| Manual pp. 21-23 | Six significant digits, and a point after a whole number, inferred from the printed results; whole numbers in full. | interpretation; ours for long whole numbers |
+| Manual pp. 21-23 | Six significant digits, inferred from the printed results; now stated by the October manual, p. 34. | interpretation, since confirmed |
 | Manual p. 15 | Running out of data ends the program quietly. | interpretation |
-| Kurtz, 2005 | `INT`, `RND` and the leading minus, taken as describing the system of May 1964, about which the manual is silent. | interpretation |
+| Kurtz, 2005 | The leading minus, taken as describing the system of 1964, about which both manuals are silent. | interpretation |
+| October manual, p. 34 | The width of a packed (`;`) field: the digits and three more, rounded up to a multiple of three. Fits p. 35 and the stated counts. | interpretation |
+| May pp. 21-23 against October p. 34 | The May results print a point after whole numbers; the October rule prints none after an exact integer. The point marks an inexact figure, and this interpreter's square roots of perfect squares are exact. | conflict, resolved by the October rule |
 | `samples/games/splat.bas` | `GOTO 540`, and no line 540. Present in the coding-horror listing; the printed book has not been checked. | slip (in that listing) |
 | `samples/games/diamond.bas` | Draws correctly only with `TAB` counting from 0 and never moving back. Not a defect in the listing: a compatibility choice. | ours |
 

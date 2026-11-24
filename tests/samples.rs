@@ -154,7 +154,9 @@ fn the_1964_manuals_examples_print_what_the_manual_prints() {
 
     // asked for 1964's printing, the figures are the page's
     use chuk_basic::Dialect::Dartmouth;
-    assert_eq!(dartmouth("preface", Dartmouth).0, " 5. \n");
+    // October 1964, p. 34: "If the number is an exact integer, the decimal
+    // point is not printed"
+    assert_eq!(dartmouth("preface", Dartmouth).0, " 5 \n");
     assert_eq!(
         dartmouth("example1", Dartmouth).0,
         "AVERAGE OF 100 LOGS\n 1.5797 \n"
@@ -180,15 +182,20 @@ fn the_1964_quadratic_example_needs_dartmouth_arithmetic() {
     );
     assert!(output.contains("ONE ROOT") && !output.contains("COMPLEX ROOTS"));
 
-    // the manual's page: "ROOTS = 3.  -1." / "ROOT = 2." / "IMAGINARY PART = 1.41421"
+    // The May page prints "ROOTS = 3.  -1." / "ROOT = 2.": by the October
+    // manual's rule 4 (p. 34) the points say the 1964 square root was not
+    // exact. Here it is, so the same figures print as exact integers. The
+    // second root and IMAGINARY PART stand under the third coefficient, as
+    // on the page: a number fills its zone (October 1964, p. 31).
     let (output, result) = dartmouth("example2", Dartmouth);
     assert!(
-        output.contains("TWO REAL ROOTS\nROOTS = 3.    -1. \n"),
+        output.contains("TWO REAL ROOTS\nROOTS =   3                   -1 \n"),
         "{output}"
     );
-    assert!(output.contains("ONE ROOT\nROOT = 2. \n"));
+    assert!(output.contains("ONE ROOT\nROOT = 2 \n"));
     assert!(
-        output.contains("COMPLEX ROOTS\nREAL PART= 0.               IMAGINARY PART= 1.41421 \n")
+        output.contains("COMPLEX ROOTS\nREAL PART=   0                IMAGINARY PART= 1.41421 \n"),
+        "{output}"
     );
     // it loops back for more DATA until there is none, and then, as p. 15
     // says, "the computer stops" - with no error, as the results on p. 22 show
@@ -196,11 +203,11 @@ fn the_1964_quadratic_example_needs_dartmouth_arithmetic() {
     assert!(output.ends_with("IMAGINARY PART= 1.41421 \n\n"), "{output}");
 }
 
-/// Where the May 1964 manual is silent - `INT` and `RND` are left to its
-/// Part II, and it does not say how a leading minus binds - the dialect
-/// follows Thomas Kurtz's account of the original BASIC.
+/// `INT` and `RND` as the October 1964 manual describes them (p. 39); how a
+/// leading minus binds, which neither manual says, from Thomas Kurtz's
+/// account of the original BASIC.
 #[test]
-fn dartmouth_int_rnd_and_leading_minus_follow_kurtz() {
+fn dartmouth_int_rnd_and_leading_minus() {
     let run = |dialect, source: &str| {
         let mut output = Vec::new();
         let program = chuk_basic::parse(source).unwrap();
@@ -215,9 +222,10 @@ fn dartmouth_int_rnd_and_leading_minus_follow_kurtz() {
     let source = "10 PRINT INT(-1.5); -2^2; -(2^2); 3 - 2^2\n20 PRINT RND(0) = RND(0)\n30 END";
     // Microsoft's RND(0) repeats the last number, so the two are equal: -1
     assert_eq!(run(Microsoft, source), "-2 -4 -4 -1 \n-1 \n");
-    // Kurtz: "truncating toward 0"; "-x^2 is understood to be (-x)^2";
-    // "the argument is ignored", so two calls give two numbers
-    assert_eq!(run(Dartmouth, source), "-1.  4. -4. -1. \n 0. \n");
+    // "INT(-7.8) is -7, not -8"; Kurtz: "-x^2 is understood to be (-x)^2";
+    // RND's argument "has no significance", so two calls give two numbers.
+    // A semicolon packs numbers into fields of six (October, p. 34).
+    assert_eq!(run(Dartmouth, source), "-1     4    -4    -1 \n 0 \n");
 }
 
 #[test]
@@ -234,7 +242,42 @@ fn dartmouth_powers_take_the_absolute_value() {
     };
     assert_eq!(
         run(chuk_basic::Dialect::Dartmouth),
-        (" 8.  3. \n".to_string(), true)
+        (" 8     3 \n".to_string(), true)
     );
     assert!(!run(chuk_basic::Dialect::Microsoft).1);
+}
+
+/// The October 1964 manual's programs print what its pages print, columns
+/// included, by its rules for PRINT (pp. 31 and 34).
+#[test]
+fn the_october_1964_manuals_examples_print_as_its_pages_do() {
+    let run = |name: &str| {
+        let mut output = Vec::new();
+        let program = chuk_basic::parse(&sample(&format!("dartmouth-oct64/{name}.bas"))).unwrap();
+        let mut input = std::io::empty();
+        let mut interpreter =
+            chuk_basic::Interpreter::new(program, &mut input, &mut output, None).unwrap();
+        interpreter.set_dialect(chuk_basic::Dialect::Dartmouth);
+        interpreter.run().unwrap();
+        String::from_utf8(output).unwrap()
+    };
+    assert_eq!(
+        run("linear"),
+        " 4             -5.5 \n .666667        .166667 \n-3.66667        3.83333 \n"
+    );
+    assert_eq!(
+        run("printer"),
+        "FIRST NO. =  2.3              SECOND NO. =-3.17 \n"
+    );
+    assert_eq!(run("printer2"), " 1              2              3              4              5 \n 6              7              8              9              10 \n 11             12            ");
+    assert_eq!(run("sales"), "TOTAL SALES FOR SALESMAN    1                $   180.5 \nTOTAL SALES FOR SALESMAN    2                $   211.3 \nTOTAL SALES FOR SALESMAN    3                $   131.65 \nTOTAL SALES FOR SALESMAN    4                $   166.55 \nTOTAL SALES FOR SALESMAN    5                $   169.4 \n");
+    assert_eq!(run("gcd3no"), "A              B              C              GCD\n 60             90             120            30 \n 38456          64872          98765          1 \n 32             384            72             8 \n");
+    assert_eq!(run("maxsin"), "X VALUE        SINE           RESOLUTION\n 1.6            .999574        .1 \n 1.57           1.             .01 \n 1.571          1.             .001 \n");
+    // p. 35: eleven cubes on the first line, eight on each of the next
+    // eleven, and 1000000 alone
+    let counts: Vec<usize> = run("cubes")
+        .lines()
+        .map(|l| l.split_whitespace().count())
+        .collect();
+    assert_eq!(counts, [11, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1]);
 }

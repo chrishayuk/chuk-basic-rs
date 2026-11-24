@@ -7,6 +7,7 @@ with no text layer.
 | Directory | Document | From | Used for |
 | --- | --- | --- | --- |
 | `dartmouth-1964/` | Dartmouth College Computation Center, *BASIC: Beginners' All-purpose Symbolic Instruction Code*, Instruction Manual, May 1964, First Draft (`basicmanual_1964.pdf`, a reprint, 14 sheets, pp. 1–23). Part I only | https://www.dartmouth.edu/basicfifty/basicmanual_1964.pdf | The `--dialect dartmouth` rules, the 1964 lint, and the page references in `samples/classic/tpk.bas`. The page images in `docs/scans/dartmouth-1964/` are from it |
+| `dartmouth-oct1964/` | Dartmouth College Computation Center, *BASIC: A Manual for BASIC, the elementary algebraic language designed for use with the Dartmouth Time Sharing System*, 1 October 1964 (`BASIC_Oct64.pdf`, a scan, 64 pages, 2,146,200 bytes; the second edition) | another scan: https://alandix.com/wp-content/uploads/2021/07/BASIC_Oct64.pdf | The dialect's rules for `PRINT`, `INT`, `RND` and `LOG`, and `samples/dartmouth-oct64`. The page images in `docs/scans/dartmouth-oct1964/` are from it |
 
 ## Not found
 
@@ -21,3 +22,9 @@ with no text layer.
   (`LET PRINT READ DATA GOTO IF FOR NEXT DEF`), so five (`GOSUB RETURN
   DIM REM STOP`) compete for Part II's four. One of those five was not in
   the May 1964 system, and it can't be identified from the reprint.
+
+The October 1964 manual narrows this. Its Appendix C, "Summary of the 15
+BASIC Statements" (pp. 56-57), lists `LET READ DATA PRINT GOTO IF-THEN FOR
+NEXT END STOP DEF GOSUB RETURN DIM REM`: Kurtz's fifteen. So by October all
+five were in the system, and one was added between May and October. The
+October manual does not say which.

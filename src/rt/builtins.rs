@@ -61,8 +61,10 @@ pub fn call(builtin: Builtin, values: &[Value], rnd: &mut Rnd, dialect: Dialect)
                 Atn => x.atan(),
                 Exp => x.exp(),
                 Abs => x.abs(),
-                Log if x <= 0.0 => return args.illegal(),
-                Log => x.ln(),
+                Log => match dialect.log(x) {
+                    Some(l) => l,
+                    None => return args.illegal(),
+                },
                 Sqr => match dialect.sqrt(x) {
                     Some(root) => root,
                     None => return args.illegal(),

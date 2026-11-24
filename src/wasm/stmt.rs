@@ -248,7 +248,7 @@ impl Gen {
                     body.code.call(self.rt.rt_spc);
                 }
                 PrintItem::Comma => body.code.call(self.rt.rt_zone),
-                PrintItem::Semi => {}
+                PrintItem::Semi => body.code.call(self.rt.rt_packed),
             }
         }
         if !matches!(items.last(), Some(PrintItem::Comma | PrintItem::Semi)) {

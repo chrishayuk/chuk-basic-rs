@@ -58,7 +58,7 @@ runtime_functions! {
     rt_div, rt_pow, rt_leading_minus, rt_and, rt_or, rt_not, rt_round,
     rt_idx, rt_dim, rt_aget_num, rt_aget_str, rt_aset_num, rt_aset_str,
     rt_arg_num, rt_arg_str, rt_call_num, rt_call_str,
-    rt_print_num, rt_print_str, rt_tab, rt_spc, rt_zone, rt_newline, rt_using,
+    rt_print_num, rt_print_str, rt_tab, rt_spc, rt_zone, rt_packed, rt_newline, rt_using,
     rt_input_want, rt_input, rt_input_num, rt_input_str, rt_line_input,
     rt_read_num, rt_read_str, rt_restore, rt_randomize,
     rt_for, rt_next, rt_gosub, rt_return, rt_on,
