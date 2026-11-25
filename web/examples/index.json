@@ -48,6 +48,91 @@
     "input": false
   },
   {
+    "file": "linear.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: two linear equations",
+    "dialect": "dartmouth",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 19",
+    "prints": "4  -5.5 / .666667  .166667 / -3.66667  3.83333",
+    "input": false
+  },
+  {
+    "file": "maxsin.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: the maximum of the sine curve, after debugging",
+    "dialect": "dartmouth",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 25",
+    "prints": "1.6  .999574  .1 / 1.57  1.  .01 / 1.571  1.  .001",
+    "input": false
+  },
+  {
+    "file": "printer.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: a label and a number",
+    "dialect": "dartmouth",
+    "scan": "oct-p32.jpg",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 32",
+    "prints": "FIRST NØ. =  2.3   SECØND NØ. =-3.17",
+    "input": false
+  },
+  {
+    "file": "printer2.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: five zones to a line",
+    "dialect": "dartmouth",
+    "scan": "oct-p32.jpg",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 32",
+    "prints": "1 2 3 4 5 / 6 7 8 9 10 / 11 12",
+    "input": false
+  },
+  {
+    "file": "powers.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: powers, and the point after an inexact figure",
+    "dialect": "dartmouth",
+    "scan": "oct-p33.jpg",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 33",
+    "prints": "1  16.  81.  256",
+    "input": false
+  },
+  {
+    "file": "cubes.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: cubes packed with semicolons",
+    "dialect": "dartmouth",
+    "scan": "oct-p35.jpg",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 35",
+    "prints": "1  8  27  64  125  216  343  512  729  1000  1331",
+    "input": false
+  },
+  {
+    "file": "sales.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: lists and tables, sales for five salesmen",
+    "dialect": "dartmouth",
+    "scan": "oct-p37.jpg",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 37",
+    "prints": "TØTAL SALES FØR SALESMAN    1    $    180.5",
+    "input": false
+  },
+  {
+    "file": "gcd3no.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: greatest common divisor of three numbers",
+    "dialect": "dartmouth",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 44",
+    "prints": "60  90  120  30 / 38456  64872  98765  1",
+    "input": false
+  },
+  {
+    "file": "roundoff-for.bas",
+    "group": "The October 1964 manual",
+    "title": "1964: summing tenths, and round-off",
+    "dialect": "dartmouth",
+    "credit": "BASIC, Dartmouth College Computation Center, 1 October 1964, p. 47",
+    "input": false
+  },
+  {
     "file": "hello.bas",
     "group": "Start here",
     "title": "Hello, world",

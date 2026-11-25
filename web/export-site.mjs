@@ -15,6 +15,9 @@ import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const scans = join(here, "..", "docs", "scans", "dartmouth-1964");
+// pages of the October 1964 manual are named oct-<file> in the examples
+const october = join(here, "..", "docs", "scans", "dartmouth-oct1964");
+const scanFile = (page) => (page.startsWith("oct-") ? join(october, page.slice(4)) : join(scans, page));
 const to = process.argv[2];
 if (!to) {
   console.error("usage: node web/export-site.mjs <destination folder>");
@@ -38,6 +41,6 @@ const examples = index.map(({ file, ...rest }) => {
   };
 });
 writeFileSync(join(to, "examples.json"), JSON.stringify(examples));
-for (const page of pages) copyFileSync(join(scans, page), join(to, "scans", page));
+for (const page of pages) copyFileSync(scanFile(page), join(to, "scans", page));
 
 console.log(`${to}: wasm, wasi.js, session.js, worker.js, lsp-worker.js, examples.json (${examples.length} programs), ${pages.size} manual pages`);
